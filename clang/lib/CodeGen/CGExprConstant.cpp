@@ -1197,6 +1197,12 @@ public:
     case CK_FixedPointToBoolean:
     case CK_FixedPointToIntegral:
     case CK_IntegralToFixedPoint:
+    case CK_FloatingToDecimalFloat:
+    case CK_DecimalFloatToFloating:
+    case CK_DecimalFloatCast:
+    case CK_DecimalFloatToBoolean:
+    case CK_DecimalFloatToIntegral:
+    case CK_IntegralToDecimalFloat:
     case CK_ZeroToOCLOpaqueType:
     case CK_MatrixCast:
       return nullptr;

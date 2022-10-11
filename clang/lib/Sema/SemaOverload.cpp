@@ -8451,6 +8451,12 @@ class BuiltinOperatorOverloadBuilder {
     ArithmeticTypes.push_back(S.Context.ShortTy);
     ArithmeticTypes.push_back(S.Context.UnsignedCharTy);
     ArithmeticTypes.push_back(S.Context.UnsignedShortTy);
+
+    // Decimal Floating Point types
+    ArithmeticTypes.push_back(S.Context.DecimalFloat32Ty);
+    ArithmeticTypes.push_back(S.Context.DecimalFloat64Ty);
+    ArithmeticTypes.push_back(S.Context.DecimalFloat128Ty);
+
     LastIntegralType = ArithmeticTypes.size();
     NumArithmeticTypes = ArithmeticTypes.size();
     // End of integral types.

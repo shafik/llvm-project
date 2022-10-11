@@ -493,6 +493,9 @@ NSAPI::getNSNumberFactoryMethodKind(QualType T) const {
   case BuiltinType::OMPArrayShaping:
   case BuiltinType::OMPIterator:
   case BuiltinType::BFloat16:
+  case BuiltinType::DecimalFloat32:
+  case BuiltinType::DecimalFloat64:
+  case BuiltinType::DecimalFloat128:
     break;
   }
 

@@ -629,6 +629,14 @@ void ASTStmtReader::VisitFixedPointLiteral(FixedPointLiteral *E) {
   E->setValue(Record.getContext(), Record.readAPInt());
 }
 
+void ASTStmtReader::VisitDecimalFloatLiteral(DecimalFloatLiteral *E) {
+  VisitExpr(E);
+  E->setLocation(readSourceLocation());
+  E->setWidth(Record.readInt());
+  E->setValue(Record.getContext(), Record.readAPInt());
+}
+
+
 void ASTStmtReader::VisitFloatingLiteral(FloatingLiteral *E) {
   VisitExpr(E);
   E->setRawSemantics(

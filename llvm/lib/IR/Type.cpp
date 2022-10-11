@@ -225,6 +225,9 @@ Type *Type::getHalfTy(LLVMContext &C) { return &C.pImpl->HalfTy; }
 Type *Type::getBFloatTy(LLVMContext &C) { return &C.pImpl->BFloatTy; }
 Type *Type::getFloatTy(LLVMContext &C) { return &C.pImpl->FloatTy; }
 Type *Type::getDoubleTy(LLVMContext &C) { return &C.pImpl->DoubleTy; }
+Type *Type::getDecimalFloat32Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat32Ty; }
+Type *Type::getDecimalFloat64Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat64Ty; }
+Type *Type::getDecimalFloat128Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat128Ty; }
 Type *Type::getMetadataTy(LLVMContext &C) { return &C.pImpl->MetadataTy; }
 Type *Type::getTokenTy(LLVMContext &C) { return &C.pImpl->TokenTy; }
 Type *Type::getX86_FP80Ty(LLVMContext &C) { return &C.pImpl->X86_FP80Ty; }
@@ -232,6 +235,7 @@ Type *Type::getFP128Ty(LLVMContext &C) { return &C.pImpl->FP128Ty; }
 Type *Type::getPPC_FP128Ty(LLVMContext &C) { return &C.pImpl->PPC_FP128Ty; }
 Type *Type::getX86_MMXTy(LLVMContext &C) { return &C.pImpl->X86_MMXTy; }
 Type *Type::getX86_AMXTy(LLVMContext &C) { return &C.pImpl->X86_AMXTy; }
+
 
 IntegerType *Type::getInt1Ty(LLVMContext &C) { return &C.pImpl->Int1Ty; }
 IntegerType *Type::getInt8Ty(LLVMContext &C) { return &C.pImpl->Int8Ty; }

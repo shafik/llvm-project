@@ -14,6 +14,7 @@
 #define LLVM_CLANG_AST_APVALUE_H
 
 #include "clang/Basic/LLVM.h"
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APFixedPoint.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APSInt.h"
@@ -123,6 +124,7 @@ class APValue {
   typedef llvm::APFixedPoint APFixedPoint;
   typedef llvm::APSInt APSInt;
   typedef llvm::APFloat APFloat;
+  typedef llvm::APDecimalFloat APDecimalFloat;
 public:
   enum ValueKind {
     /// There is no such object (it's outside its lifetime).
@@ -140,7 +142,8 @@ public:
     Struct,
     Union,
     MemberPointer,
-    AddrLabelDiff
+    AddrLabelDiff,
+    DecimalFloat
   };
 
   class LValueBase {
@@ -316,6 +319,9 @@ public:
   explicit APValue(APFixedPoint FX) : Kind(None) {
     MakeFixedPoint(std::move(FX));
   }
+  explicit APValue(APDecimalFloat DF) : Kind(None) {
+    MakeDecimalFloat(std::move(DF));
+  }
   explicit APValue(const APValue *E, unsigned N) : Kind(None) {
     MakeVector(); setVector(E, N);
   }
@@ -402,6 +408,7 @@ public:
   bool isUnion() const { return Kind == Union; }
   bool isMemberPointer() const { return Kind == MemberPointer; }
   bool isAddrLabelDiff() const { return Kind == AddrLabelDiff; }
+  bool isDecimalFloat() const { return Kind == DecimalFloat; }
 
   void dump() const;
   void dump(raw_ostream &OS, const ASTContext &Context) const;
@@ -440,6 +447,14 @@ public:
   }
   const APFixedPoint &getFixedPoint() const {
     return const_cast<APValue *>(this)->getFixedPoint();
+  }
+
+  APDecimalFloat &getDecimalFloat() {
+    assert(isDecimalFloat() && "Invalid accessor");
+    return *(APDecimalFloat *)(char *)&Data;
+  }
+  const APDecimalFloat &getDecimalFloat() const {
+    return const_cast<APValue *>(this)->getDecimalFloat();
   }
 
   APSInt &getComplexIntReal() {
@@ -589,6 +604,10 @@ public:
     assert(isFixedPoint() && "Invalid accessor");
     *(APFixedPoint *)(char *)&Data = std::move(FX);
   }
+  void setDecimalFloat(APDecimalFloat FX) {
+    assert(isDecimalFloat() && "Invalid accessor");
+    *(APDecimalFloat *)(char *)&Data = std::move(FX);
+  }
   void setVector(const APValue *E, unsigned N) {
     MutableArrayRef<APValue> InternalElts = setVectorUninit(N);
     for (unsigned i = 0; i != N; ++i)
@@ -636,6 +655,11 @@ private:
     assert(isAbsent() && "Bad state change");
     new ((void *)(char *)&Data) APFixedPoint(std::move(FX));
     Kind = FixedPoint;
+  }
+  void MakeDecimalFloat(APDecimalFloat &&DF) {
+    assert(isAbsent() && "Bad state change");
+    new ((void *)(char *)&Data) APDecimalFloat(std::move(DF));
+    Kind = DecimalFloat;
   }
   void MakeVector() {
     assert(isAbsent() && "Bad state change");

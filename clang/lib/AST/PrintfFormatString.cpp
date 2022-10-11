@@ -783,6 +783,9 @@ bool PrintfSpecifier::fixType(QualType QT, const LangOptions &LangOpt,
   case BuiltinType::SatUShortFract:
   case BuiltinType::SatUFract:
   case BuiltinType::SatULongFract:
+  case BuiltinType::DecimalFloat32:
+  case BuiltinType::DecimalFloat64:
+  case BuiltinType::DecimalFloat128:
     // Various types which are non-trivial to correct.
     return false;
 

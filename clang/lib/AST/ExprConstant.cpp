@@ -51,6 +51,7 @@
 #include "clang/AST/TypeLoc.h"
 #include "clang/Basic/Builtins.h"
 #include "clang/Basic/TargetInfo.h"
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APFixedPoint.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallBitVector.h"
@@ -63,6 +64,7 @@
 #define DEBUG_TYPE "exprconstant"
 
 using namespace clang;
+using llvm::APDecimalFloat;
 using llvm::APFixedPoint;
 using llvm::APInt;
 using llvm::APSInt;
@@ -1833,6 +1835,11 @@ static bool EvaluateFixedPointOrInteger(const Expr *E, APFixedPoint &Result,
 static bool EvaluateFixedPoint(const Expr *E, APFixedPoint &Result,
                                EvalInfo &Info);
 
+/// Evaluate only a decimal float expression into an APResult.
+static bool EvaluateDecimalFloat(const Expr *E, APDecimalFloat &Result,
+                               EvalInfo &Info);
+
+
 //===----------------------------------------------------------------------===//
 // Misc utilities
 //===----------------------------------------------------------------------===//
@@ -2489,6 +2496,9 @@ static bool HandleConversionToBool(const APValue &Val, bool &Result) {
     return true;
   case APValue::FixedPoint:
     Result = Val.getFixedPoint().getBoolValue();
+    return true;
+  case APValue::DecimalFloat:
+    Result = Val.getDecimalFloat().getBoolValue();
     return true;
   case APValue::Float:
     Result = !Val.getFloat().isZero();
@@ -11091,6 +11101,41 @@ class FixedPointExprEvaluator
   bool VisitUnaryOperator(const UnaryOperator *E);
   bool VisitBinaryOperator(const BinaryOperator *E);
 };
+
+
+class DecimalFloatExprEvaluator
+    : public ExprEvaluatorBase<DecimalFloatExprEvaluator> {
+  APValue &Result;
+
+ public:
+  DecimalFloatExprEvaluator(EvalInfo &info, APValue &result)
+      : ExprEvaluatorBaseTy(info), Result(result) {}
+
+  bool Success(const APValue &V, const Expr *E) {
+    return Success(V.getDecimalFloat(), E);
+  }
+
+  bool Success(const APDecimalFloat &V, const Expr *E) {
+    assert(E->getType()->isDecimalFloatType() && "Invalid evaluation result.");
+    assert(V.getWidth() == Info.Ctx.getIntWidth(E->getType()) &&
+           "Invalid evaluation result.");
+    Result = APValue(V);
+    return true;
+  }
+
+  //===--------------------------------------------------------------------===//
+  //                            Visitor Methods
+  //===--------------------------------------------------------------------===//
+
+  bool VisitDecimalFloatLiteral(const DecimalFloatLiteral *E) {
+    return Success(E->getValue(), E);
+  }
+
+  bool VisitCastExpr(const CastExpr *E);
+  bool VisitUnaryOperator(const UnaryOperator *E);
+  bool VisitBinaryOperator(const BinaryOperator *E);
+};
+
 } // end anonymous namespace
 
 /// EvaluateIntegerOrLValue - Evaluate an rvalue integral-typed expression, and
@@ -11140,6 +11185,22 @@ static bool EvaluateFixedPoint(const Expr *E, APFixedPoint &Result,
       return false;
 
     Result = Val.getFixedPoint();
+    return true;
+  }
+  return false;
+}
+
+static bool EvaluateDecimalFloat(const Expr *E, APDecimalFloat &Result,
+                               EvalInfo &Info) {
+ assert(!E->isValueDependent());
+  if (E->getType()->isDecimalFloatType()) {
+    APValue Val;
+    if (!DecimalFloatExprEvaluator(Info, Val).Visit(E))
+      return false;
+    if (!Val.isDecimalFloat())
+      return false;
+
+    Result = Val.getDecimalFloat();
     return true;
   }
   return false;
@@ -13866,6 +13927,157 @@ bool FixedPointExprEvaluator::VisitBinaryOperator(const BinaryOperator *E) {
   return Success(Result, E);
 }
 
+bool DecimalFloatExprEvaluator::VisitUnaryOperator(const UnaryOperator *E) {
+  switch (E->getOpcode()) {
+    default:
+      // Invalid unary operators
+      return Error(E);
+    case UO_Plus:
+      // The result is just the value.
+      return Visit(E->getSubExpr());
+    case UO_Minus: {
+      if (!Visit(E->getSubExpr())) return false;
+      if (!Result.isDecimalFloat())
+        return Error(E);
+      bool Overflowed;
+      APDecimalFloat Negated = Result.getDecimalFloat().negate(&Overflowed);
+      if (Overflowed && !HandleOverflow(Info, E, Negated, E->getType()))
+        return false;
+      return Success(Negated, E);
+    }
+  }
+}
+
+bool DecimalFloatExprEvaluator::VisitBinaryOperator(const BinaryOperator *E) {
+  if (E->isPtrMemOp() || E->isAssignmentOp() || E->getOpcode() == BO_Comma)
+    return ExprEvaluatorBaseTy::VisitBinaryOperator(E);
+
+  const Expr *LHS = E->getLHS();
+  const Expr *RHS = E->getRHS();
+  llvm::decFltSemantics ResultFXSema =
+      Info.Ctx.getDecimalFloatSemantics(E->getType());
+
+  APDecimalFloat LHSFX(Info.Ctx.getDecimalFloatSemantics(LHS->getType()));
+  if (!EvaluateDecimalFloat(LHS, LHSFX, Info))
+    return false;
+  APDecimalFloat RHSFX(Info.Ctx.getDecimalFloatSemantics(RHS->getType()));
+  if (!EvaluateDecimalFloat(RHS, RHSFX, Info))
+    return false;
+
+  bool OpOverflow = false, ConversionOverflow = false;
+  APDecimalFloat Result(LHSFX.getSemantics());
+  switch (E->getOpcode()) {
+  case BO_Add: {
+    Result = LHSFX.add(RHSFX, &OpOverflow)
+                  .convert(ResultFXSema, &ConversionOverflow);
+    break;
+  }
+  case BO_Sub: {
+    Result = LHSFX.sub(RHSFX, &OpOverflow)
+                  .convert(ResultFXSema, &ConversionOverflow);
+    break;
+  }
+  case BO_Mul: {
+    Result = LHSFX.mul(RHSFX, &OpOverflow)
+                  .convert(ResultFXSema, &ConversionOverflow);
+    break;
+  }
+  case BO_Div: {
+    if (RHSFX.isZero()) {
+      Info.FFDiag(E, diag::note_expr_divide_by_zero);
+      return false;
+    }
+    Result = LHSFX.div(RHSFX, &OpOverflow)
+                  .convert(ResultFXSema, &ConversionOverflow);
+    break;
+  }
+  
+  default:
+    return false;
+  }
+  if (OpOverflow || ConversionOverflow) {
+    if (Info.checkingForUndefinedBehavior())
+      Info.Ctx.getDiagnostics().Report(E->getExprLoc(),
+                                       diag::warn_fixedpoint_constant_overflow)
+        << Result.toString() << E->getType();
+    if (!HandleOverflow(Info, E, Result, E->getType()))
+      return false;
+  }
+  return Success(Result, E);
+}
+
+bool DecimalFloatExprEvaluator::VisitCastExpr(const CastExpr *E) {
+  const Expr *SubExpr = E->getSubExpr();
+  QualType DestType = E->getType();
+  assert(DestType->isDecimalFloatType() &&
+         "Expected destination type to be a decimal float type");
+  auto DestFXSema = Info.Ctx.getDecimalFloatSemantics(DestType);
+
+  switch (E->getCastKind()) {
+  case CK_DecimalFloatCast: {
+    APDecimalFloat Src(Info.Ctx.getDecimalFloatSemantics(SubExpr->getType()));
+    if (!EvaluateDecimalFloat(SubExpr, Src, Info))
+      return false;
+    bool Overflowed;
+    APDecimalFloat Result = Src.convert(DestFXSema, &Overflowed);
+    if (Overflowed) {
+      if (Info.checkingForUndefinedBehavior())
+        Info.Ctx.getDiagnostics().Report(E->getExprLoc(),
+                                         diag::warn_fixedpoint_constant_overflow)
+          << Result.toString() << E->getType();
+      if (!HandleOverflow(Info, E, Result, E->getType()))
+        return false;
+    }
+    return Success(Result, E);
+  }
+  case CK_IntegralToDecimalFloat: {
+    APSInt Src;
+    if (!EvaluateInteger(SubExpr, Src, Info))
+      return false;
+
+    bool Overflowed;
+    APDecimalFloat IntResult = APDecimalFloat::getFromIntValue(
+        Src, Info.Ctx.getDecimalFloatSemantics(DestType), &Overflowed);
+
+    if (Overflowed) {
+      if (Info.checkingForUndefinedBehavior())
+        Info.Ctx.getDiagnostics().Report(E->getExprLoc(),
+                                         diag::warn_fixedpoint_constant_overflow)
+          << IntResult.toString() << E->getType();
+      if (!HandleOverflow(Info, E, IntResult, E->getType()))
+        return false;
+    }
+
+    return Success(IntResult, E);
+  }
+  case CK_FloatingToDecimalFloat: {
+    APFloat Src(0.0);
+    if (!EvaluateFloat(SubExpr, Src, Info))
+      return false;
+
+    bool Overflowed;
+    APDecimalFloat Result = APDecimalFloat::getFromFloatValue(
+        Src, Info.Ctx.getDecimalFloatSemantics(DestType), &Overflowed);
+
+    if (Overflowed) {
+      if (Info.checkingForUndefinedBehavior())
+        Info.Ctx.getDiagnostics().Report(E->getExprLoc(),
+                                         diag::warn_fixedpoint_constant_overflow)
+          << Result.toString() << E->getType();
+      if (!HandleOverflow(Info, E, Result, E->getType()))
+        return false;
+    }
+
+    return Success(Result, E);
+  }
+  case CK_NoOp:
+  case CK_LValueToRValue:
+    return ExprEvaluatorBaseTy::VisitCastExpr(E);
+  default:
+    return Error(E);
+  }
+}
+
 //===----------------------------------------------------------------------===//
 // Float Evaluation
 //===----------------------------------------------------------------------===//
@@ -14894,6 +15106,8 @@ static bool Evaluate(APValue &Result, EvalInfo &Info, const Expr *E) {
     C.moveInto(Result);
   } else if (T->isFixedPointType()) {
     if (!FixedPointExprEvaluator(Info, Result).Visit(E)) return false;
+  } else if (T->isDecimalFloatType()) {
+    if (!DecimalFloatExprEvaluator(Info, Result).Visit(E)) return false;
   } else if (T->isMemberPointerType()) {
     MemberPtr P;
     if (!EvaluateMemberPointer(E, P, Info))

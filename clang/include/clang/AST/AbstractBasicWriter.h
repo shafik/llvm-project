@@ -172,6 +172,10 @@ public:
                          sema.hasUnsignedPadding() << 2);
   }
 
+  void writedecFltSemantics(const llvm::decFltSemantics &sema) {
+    asImpl().writeUInt32(sema.getWidth());
+  }
+
   void writeLValuePathSerializationHelper(
       APValue::LValuePathSerializationHelper lvaluePath) {
     ArrayRef<APValue::LValuePathEntry> path = lvaluePath.Path;

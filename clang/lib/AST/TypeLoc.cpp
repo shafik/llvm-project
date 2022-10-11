@@ -348,6 +348,12 @@ TypeSpecifierType BuiltinTypeLoc::getWrittenTypeSpec() const {
   case BuiltinType::WChar_S:
   case BuiltinType::WChar_U:
     return TST_wchar;
+  case BuiltinType::DecimalFloat32:
+    return TST_decimal32;
+  case BuiltinType::DecimalFloat64:
+    return TST_decimal64;
+  case BuiltinType::DecimalFloat128:
+    return TST_decimal128;
   case BuiltinType::UChar:
   case BuiltinType::UShort:
   case BuiltinType::UInt:

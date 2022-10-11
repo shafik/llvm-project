@@ -188,6 +188,12 @@ public:
                                      hasUnsignedPadding);
   }
 
+  llvm::decFltSemantics readdecFltSemantics() {
+    unsigned width = asImpl().readUInt32();
+    
+    return llvm::decFltSemantics(width);
+  }
+
   APValue::LValuePathSerializationHelper readLValuePathSerializationHelper(
       SmallVectorImpl<APValue::LValuePathEntry> &path) {
     auto elemTy = asImpl().readQualType();

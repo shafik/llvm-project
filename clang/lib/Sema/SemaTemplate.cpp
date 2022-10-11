@@ -7267,6 +7267,7 @@ ExprResult Sema::CheckTemplateArgument(NonTypeTemplateParmDecl *Param,
     case APValue::AddrLabelDiff:
       return Diag(StartLoc, diag::err_non_type_template_arg_addr_label_diff);
     case APValue::FixedPoint:
+    case APValue::DecimalFloat:
     case APValue::Float:
     case APValue::ComplexInt:
     case APValue::ComplexFloat:

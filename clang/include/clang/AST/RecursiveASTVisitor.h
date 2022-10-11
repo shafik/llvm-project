@@ -2905,6 +2905,7 @@ DEF_TRAVERSE_STMT(RequiresExpr, {
 // These literals (all of them) do not need any action.
 DEF_TRAVERSE_STMT(IntegerLiteral, {})
 DEF_TRAVERSE_STMT(FixedPointLiteral, {})
+DEF_TRAVERSE_STMT(DecimalFloatLiteral, {})
 DEF_TRAVERSE_STMT(CharacterLiteral, {})
 DEF_TRAVERSE_STMT(FloatingLiteral, {})
 DEF_TRAVERSE_STMT(ImaginaryLiteral, {})

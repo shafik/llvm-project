@@ -662,6 +662,15 @@ void ASTStmtWriter::VisitFixedPointLiteral(FixedPointLiteral *E) {
   Code = serialization::EXPR_FIXEDPOINT_LITERAL;
 }
 
+void ASTStmtWriter::VisitDecimalFloatLiteral(DecimalFloatLiteral *E) {
+  VisitExpr(E);
+  Record.AddSourceLocation(E->getLocation());
+  Record.push_back(E->getWidth());
+  Record.AddAPInt(E->getValue().bitcastToAPInt());
+  Code = serialization::EXPR_DECIMALFLOAT_LITERAL;
+}
+
+
 void ASTStmtWriter::VisitFloatingLiteral(FloatingLiteral *E) {
   VisitExpr(E);
   Record.push_back(E->getRawSemantics());

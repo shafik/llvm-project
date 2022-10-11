@@ -64,6 +64,7 @@
 #include "clang/Basic/TargetCXXABI.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/XRayLists.h"
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APFixedPoint.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/APSInt.h"
@@ -1325,6 +1326,10 @@ void ASTContext::InitBuiltinTypes(const TargetInfo &Target,
   // __ibm128 for IBM extended precision
   InitBuiltinType(Ibm128Ty, BuiltinType::Ibm128);
 
+  InitBuiltinType(DecimalFloat32Ty, BuiltinType::DecimalFloat32);
+  InitBuiltinType(DecimalFloat64Ty, BuiltinType::DecimalFloat64);
+  InitBuiltinType(DecimalFloat128Ty, BuiltinType::DecimalFloat128);
+
   // C11 extension ISO/IEC TS 18661-3
   InitBuiltinType(Float16Ty,           BuiltinType::Float16);
 
@@ -1733,6 +1738,7 @@ const llvm::fltSemantics &ASTContext::getFloatTypeSemantics(QualType T) const {
     return Target->getFloat128Format();
   }
 }
+
 
 CharUnits ASTContext::getDeclAlign(const Decl *D, bool ForAlignof) const {
   unsigned Align = Target->getCharWidth();
@@ -2158,6 +2164,18 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
       Width = Target->getIbm128Width();
       Align = Target->getIbm128Align();
       break;
+    case BuiltinType::DecimalFloat32:
+      Width = Target->getDecimalFloat32Width();
+      Align = Target->getDecimalFloat32Align();
+      break;
+    case BuiltinType::DecimalFloat64:
+      Width = Target->getDecimalFloat64Width();
+      Align = Target->getDecimalFloat64Align();
+      break;
+    case BuiltinType::DecimalFloat128:
+      Width = Target->getDecimalFloat128Width();
+      Align = Target->getDecimalFloat128Align();
+      break;  
     case BuiltinType::LongDouble:
       if (getLangOpts().OpenMP && getLangOpts().OpenMPIsDevice &&
           (Target->getLongDoubleWidth() != AuxTarget->getLongDoubleWidth() ||
@@ -8004,6 +8022,9 @@ static char getObjCEncodingForPrimitiveType(const ASTContext *C,
     case BuiltinType::SatUShortFract:
     case BuiltinType::SatUFract:
     case BuiltinType::SatULongFract:
+    case BuiltinType::DecimalFloat32:
+    case BuiltinType::DecimalFloat64:
+    case BuiltinType::DecimalFloat128:
       // FIXME: potentially need @encodes for these!
       return ' ';
 
@@ -13247,6 +13268,22 @@ llvm::APFixedPoint ASTContext::getFixedPointMax(QualType Ty) const {
 llvm::APFixedPoint ASTContext::getFixedPointMin(QualType Ty) const {
   assert(Ty->isFixedPointType());
   return llvm::APFixedPoint::getMin(getFixedPointSemantics(Ty));
+}
+
+llvm::decFltSemantics ASTContext::getDecimalFloatSemantics(QualType Ty) const{
+  assert(Ty->isDecimalFloatType());
+
+  return llvm::decFltSemantics(static_cast<unsigned>(getTypeSize(Ty)));
+}
+
+llvm::APDecimalFloat ASTContext::getDecimalFloatMax(QualType Ty) const {
+  assert(Ty->isDecimalFloatType());
+  return llvm::APDecimalFloat::getMax(getDecimalFloatSemantics(Ty));
+}
+
+llvm::APDecimalFloat ASTContext::getDecimalFloatMin(QualType Ty) const {
+  assert(Ty->isDecimalFloatType());
+  return llvm::APDecimalFloat::getMin(getDecimalFloatSemantics(Ty));
 }
 
 QualType ASTContext::getCorrespondingSignedFixedPointType(QualType Ty) const {

@@ -171,6 +171,15 @@ serialization::TypeIdxFromBuiltin(const BuiltinType *BT) {
   case BuiltinType::Ibm128:
     ID = PREDEF_TYPE_IBM128_ID;
     break;
+  case BuiltinType::DecimalFloat32:
+    ID = PREDEF_TYPE_DECIMAL_FLOAT32_ID;
+    break;
+  case BuiltinType::DecimalFloat64:
+    ID = PREDEF_TYPE_DECIMAL_FLOAT64_ID;
+    break;
+  case BuiltinType::DecimalFloat128:
+    ID = PREDEF_TYPE_DECIMAL_FLOAT128_ID;
+    break;
   case BuiltinType::NullPtr:
     ID = PREDEF_TYPE_NULLPTR_ID;
     break;

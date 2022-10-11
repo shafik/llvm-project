@@ -7004,6 +7004,15 @@ QualType ASTReader::GetType(TypeID ID) {
     case PREDEF_TYPE_IBM128_ID:
       T = Context.Ibm128Ty;
       break;
+    case PREDEF_TYPE_DECIMAL_FLOAT32_ID:
+      T = Context.DecimalFloat32Ty;
+      break;
+    case PREDEF_TYPE_DECIMAL_FLOAT64_ID:
+      T = Context.DecimalFloat64Ty;
+      break;
+    case PREDEF_TYPE_DECIMAL_FLOAT128_ID:
+      T = Context.DecimalFloat128Ty;
+      break;
     case PREDEF_TYPE_OVERLOAD_ID:
       T = Context.OverloadTy;
       break;

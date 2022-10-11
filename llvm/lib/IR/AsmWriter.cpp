@@ -541,6 +541,9 @@ void TypePrinting::print(Type *Ty, raw_ostream &OS) {
   case Type::BFloatTyID:    OS << "bfloat"; return;
   case Type::FloatTyID:     OS << "float"; return;
   case Type::DoubleTyID:    OS << "double"; return;
+  case Type::DecimalFloat32TyID:    OS << "_Decimal32"; return;
+  case Type::DecimalFloat64TyID:    OS << "_Decimal64"; return;
+  case Type::DecimalFloat128TyID:    OS << "_Decimal128"; return;
   case Type::X86_FP80TyID:  OS << "x86_fp80"; return;
   case Type::FP128TyID:     OS << "fp128"; return;
   case Type::PPC_FP128TyID: OS << "ppc_fp128"; return;

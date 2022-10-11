@@ -3074,6 +3074,12 @@ StringRef BuiltinType::getName(const PrintingPolicy &Policy) const {
     return "__float128";
   case Ibm128:
     return "__ibm128";
+  case DecimalFloat32:
+    return "_Decimal32";
+  case DecimalFloat64:
+    return "_Decimal64";
+  case DecimalFloat128:
+    return "_Decimal128";
   case WChar_S:
   case WChar_U:
     return Policy.MSWChar ? "__wchar_t" : "wchar_t";
@@ -4480,6 +4486,10 @@ void clang::FixedPointValueToString(SmallVectorImpl<char> &Str,
                                    /*IsSaturated=*/false,
                                    /*HasUnsignedPadding=*/false);
   llvm::APFixedPoint(Val, FXSema).toString(Str);
+}
+
+void clang::DecimalFloatValueToString(SmallVectorImpl<char> &Str, llvm::APDecimalFloat Val) {
+  Val.toString(Str);
 }
 
 AutoType::AutoType(QualType DeducedAsType, AutoTypeKeyword Keyword,

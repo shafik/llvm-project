@@ -90,6 +90,12 @@ TargetInfo::TargetInfo(const llvm::Triple &T) : Triple(T) {
   LongDoubleAlign = 64;
   Float128Align = 128;
   Ibm128Align = 128;
+  DecimalFloat32Width = 32;
+  DecimalFloat32Align = 32;
+	DecimalFloat64Width = 64;
+  DecimalFloat64Align = 64;
+	DecimalFloat128Width = 128;
+  DecimalFloat128Align = 128;
   LargeArrayMinWidth = 0;
   LargeArrayAlign = 0;
   MaxAtomicPromoteWidth = MaxAtomicInlineWidth = 0;

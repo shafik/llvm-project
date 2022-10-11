@@ -89,6 +89,9 @@ struct TransferrableTargetInfo {
   unsigned char FloatWidth, FloatAlign;
   unsigned char DoubleWidth, DoubleAlign;
   unsigned char LongDoubleWidth, LongDoubleAlign, Float128Align, Ibm128Align;
+  unsigned char DecimalFloat32Width, DecimalFloat32Align;
+  unsigned char DecimalFloat64Width, DecimalFloat64Align;
+  unsigned char DecimalFloat128Width, DecimalFloat128Align;
   unsigned char LargeArrayMinWidth, LargeArrayAlign;
   unsigned char LongWidth, LongAlign;
   unsigned char LongLongWidth, LongLongAlign;
@@ -741,6 +744,21 @@ public:
   unsigned getIbm128Width() const { return 128; }
   unsigned getIbm128Align() const { return Ibm128Align; }
   const llvm::fltSemantics &getIbm128Format() const { return *Ibm128Format; }
+
+  /// DecimalFloat32Width/Align/Format - Return the size/align/format of
+  /// '_Decimal32'.
+  unsigned getDecimalFloat32Width() const { return DecimalFloat32Width; }
+  unsigned getDecimalFloat32Align() const { return DecimalFloat32Align; }
+
+  /// DecimalFloat64Width/Align/Format - Return the size/align/format of
+  /// '_Decimal64'.
+  unsigned getDecimalFloat64Width() const { return DecimalFloat64Width; }
+  unsigned getDecimalFloat64Align() const { return DecimalFloat64Align; }
+
+  /// DecimalFloat128Width/Align/Format - Return the size/align/format of
+  /// '_Decimal128'.
+  unsigned getDecimalFloat128Width() const { return DecimalFloat128Width; }
+  unsigned getDecimalFloat128Align() const { return DecimalFloat128Align; }
 
   /// Return the mangled code of long double.
   virtual const char *getLongDoubleMangling() const { return "e"; }

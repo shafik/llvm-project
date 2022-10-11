@@ -3235,6 +3235,9 @@ static bool TypeInfoIsInStandardLibrary(const BuiltinType *Ty) {
     case BuiltinType::Char32:
     case BuiltinType::Int128:
     case BuiltinType::UInt128:
+    case BuiltinType::DecimalFloat32:
+    case BuiltinType::DecimalFloat64:
+    case BuiltinType::DecimalFloat128:
       return true;
 
 #define IMAGE_TYPE(ImgType, Id, SingletonId, Access, Suffix) \
@@ -4166,7 +4169,8 @@ void ItaniumCXXABI::EmitFundamentalRTTIDescriptors(const CXXRecordDecl *RD) {
       getContext().FloatTy,            getContext().DoubleTy,
       getContext().LongDoubleTy,       getContext().Float128Ty,
       getContext().Char8Ty,            getContext().Char16Ty,
-      getContext().Char32Ty
+      getContext().Char32Ty,           getContext().DecimalFloat32Ty,
+      getContext().DecimalFloat64Ty,   getContext().DecimalFloat128Ty
   };
   llvm::GlobalValue::DLLStorageClassTypes DLLStorageClass =
       RD->hasAttr<DLLExportAttr>() || CGM.shouldMapVisibilityToDLLExport(RD)

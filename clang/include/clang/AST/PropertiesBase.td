@@ -117,6 +117,9 @@ def ExtParameterInfo : PropertyType<"FunctionProtoType::ExtParameterInfo">;
 def FixedPointSemantics : PropertyType<"llvm::FixedPointSemantics"> {
   let PassByReference = 1;
 }
+def decFltSemantics : PropertyType<"llvm::decFltSemantics"> {
+  let PassByReference = 1;
+}
 def Identifier : RefPropertyType<"IdentifierInfo"> { let ConstWhenWriting = 1; }
 def LValuePathEntry : PropertyType<"APValue::LValuePathEntry">;
 def LValuePathSerializationHelper :
@@ -291,6 +294,17 @@ let Class = PropertyTypeCase<APValue, "FixedPoint"> in {
   }
   def : Creator<[{
     return APValue(llvm::APFixedPoint(std::move(value), semantics));
+  }]>;
+}
+let Class = PropertyTypeCase<APValue, "DecimalFloat"> in {
+  def : Property<"semantics", decFltSemantics> {
+    let Read = [{ node.getDecimalFloat().getSemantics() }];
+  }
+  def : Property<"value", APInt> {
+    let Read = [{ node.getDecimalFloat().bitcastToAPInt() }];
+  }
+  def : Creator<[{
+    return APValue(llvm::APDecimalFloat(std::move(value), semantics));
   }]>;
 }
 let Class = PropertyTypeCase<APValue, "ComplexInt"> in {

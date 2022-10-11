@@ -917,6 +917,12 @@ void AggExprEmitter::VisitCastExpr(CastExpr *E) {
   case CK_FixedPointToBoolean:
   case CK_FixedPointToIntegral:
   case CK_IntegralToFixedPoint:
+  case CK_FloatingToDecimalFloat:
+  case CK_DecimalFloatToFloating:
+  case CK_DecimalFloatCast:
+  case CK_DecimalFloatToBoolean:
+  case CK_DecimalFloatToIntegral:
+  case CK_IntegralToDecimalFloat:
     llvm_unreachable("cast kind invalid for aggregate types");
   }
 }
@@ -1459,6 +1465,13 @@ static bool castPreservesZero(const CastExpr *CE) {
   case CK_FloatingToFixedPoint:
   case CK_IntegralToFixedPoint:
     // FIXME: Do all fixed-point types represent zero as all 0 bits?
+  case CK_FloatingToDecimalFloat:
+  case CK_DecimalFloatToFloating:
+  case CK_DecimalFloatCast:
+  case CK_DecimalFloatToBoolean:
+  case CK_DecimalFloatToIntegral:
+  case CK_IntegralToDecimalFloat:
+    // FIXME: confirm this is correct
     return false;
 
   case CK_AddressSpaceConversion:

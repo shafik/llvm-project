@@ -1015,6 +1015,24 @@ std::string FixedPointLiteral::getValueAsString(unsigned Radix) const {
   return std::string(S.str());
 }
 
+DecimalFloatLiteral::DecimalFloatLiteral(const ASTContext &C, const llvm::APDecimalFloat &V,
+                                     QualType type, SourceLocation l, unsigned width)
+    : Expr(DecimalFloatLiteralClass, type, VK_PRValue, OK_Ordinary), Loc(l), width(width) {
+  assert(type->isDecimalFloatType() && "Illegal type in DecimalFloatLiterals");
+  
+  setValue(C,V);
+  setDependence(ExprDependence::None);
+}
+
+std::string DecimalFloatLiteral::getValueAsString() const {
+  // Currently the longest decimal number that can be printed is the max for an
+  // unsigned long _Accum: 4294967295.99999999976716935634613037109375
+  // which is 43 characters.
+  SmallString<64> S;
+  DecimalFloatValueToString(S,getValue());
+  return std::string(S.str());
+}
+
 void CharacterLiteral::print(unsigned Val, CharacterKind Kind,
                              raw_ostream &OS) {
   switch (Kind) {
@@ -1905,6 +1923,11 @@ bool CastExpr::CastConsistency() const {
   case CK_FixedPointCast:
   case CK_FixedPointToIntegral:
   case CK_IntegralToFixedPoint:
+  case CK_FloatingToDecimalFloat:
+  case CK_DecimalFloatToFloating:
+  case CK_DecimalFloatCast:
+  case CK_DecimalFloatToIntegral:
+  case CK_IntegralToDecimalFloat:
   case CK_MatrixCast:
     assert(!getType()->isBooleanType() && "unheralded conversion to bool");
     goto CheckNoBasePath;
@@ -3526,6 +3549,7 @@ bool Expr::HasSideEffects(const ASTContext &Ctx,
   case PredefinedExprClass:
   case IntegerLiteralClass:
   case FixedPointLiteralClass:
+  case DecimalFloatLiteralClass:
   case FloatingLiteralClass:
   case ImaginaryLiteralClass:
   case StringLiteralClass:

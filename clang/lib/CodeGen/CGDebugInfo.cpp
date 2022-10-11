@@ -887,6 +887,11 @@ llvm::DIType *CGDebugInfo::CreateType(const BuiltinType *BT) {
   case BuiltinType::SatULongFract:
     Encoding = llvm::dwarf::DW_ATE_unsigned_fixed;
     break;
+  case BuiltinType::DecimalFloat32:
+  case BuiltinType::DecimalFloat64:
+  case BuiltinType::DecimalFloat128:
+    Encoding = llvm::dwarf::DW_ATE_unsigned;
+    break;
   }
 
   BTName = BT->getName(CGM.getLangOpts());

@@ -1077,6 +1077,16 @@ enum PredefinedTypeIDs {
   /// \brief The '__ibm128' type
   PREDEF_TYPE_IBM128_ID = 74,
 
+  /// \brief The '_Decimal32' type
+  PREDEF_TYPE_DECIMAL_FLOAT32_ID = 75,
+
+  /// \brief The '_Decimal64' type
+  PREDEF_TYPE_DECIMAL_FLOAT64_ID = 76,
+
+  /// \brief The '_Decimal128' type
+  PREDEF_TYPE_DECIMAL_FLOAT128_ID = 77,
+
+
 /// OpenCL image types with auto numeration
 #define IMAGE_TYPE(ImgType, Id, SingletonId, Access, Suffix)                   \
   PREDEF_TYPE_##Id##_ID,
@@ -1997,6 +2007,9 @@ enum StmtCode {
 
   // FixedPointLiteral
   EXPR_FIXEDPOINT_LITERAL,
+
+  // DecimalFloatLiteral
+  EXPR_DECIMALFLOAT_LITERAL,
 
   // SYCLUniqueStableNameExpr
   EXPR_SYCL_UNIQUE_STABLE_NAME,

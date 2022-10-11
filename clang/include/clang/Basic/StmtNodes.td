@@ -61,6 +61,7 @@ def SYCLUniqueStableNameExpr : StmtNode<Expr>;
 def DeclRefExpr : StmtNode<Expr>;
 def IntegerLiteral : StmtNode<Expr>;
 def FixedPointLiteral : StmtNode<Expr>;
+def DecimalFloatLiteral : StmtNode<Expr>;
 def FloatingLiteral : StmtNode<Expr>;
 def ImaginaryLiteral : StmtNode<Expr>;
 def StringLiteral : StmtNode<Expr>;

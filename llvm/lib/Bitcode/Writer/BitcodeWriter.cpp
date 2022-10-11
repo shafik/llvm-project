@@ -941,6 +941,9 @@ void ModuleBitcodeWriter::writeTypeTable() {
     case Type::BFloatTyID:    Code = bitc::TYPE_CODE_BFLOAT;    break;
     case Type::FloatTyID:     Code = bitc::TYPE_CODE_FLOAT;     break;
     case Type::DoubleTyID:    Code = bitc::TYPE_CODE_DOUBLE;    break;
+    case Type::DecimalFloat32TyID:    Code = bitc::TYPE_CODE_DECIMAL_FLOAT32;    break;
+    case Type::DecimalFloat64TyID:    Code = bitc::TYPE_CODE_DECIMAL_FLOAT64;    break;
+    case Type::DecimalFloat128TyID:    Code = bitc::TYPE_CODE_DECIMAL_FLOAT128;    break;
     case Type::X86_FP80TyID:  Code = bitc::TYPE_CODE_X86_FP80;  break;
     case Type::FP128TyID:     Code = bitc::TYPE_CODE_FP128;     break;
     case Type::PPC_FP128TyID: Code = bitc::TYPE_CODE_PPC_FP128; break;

@@ -4764,6 +4764,12 @@ LValue CodeGenFunction::EmitCastLValue(const CastExpr *E) {
   case CK_FixedPointToBoolean:
   case CK_FixedPointToIntegral:
   case CK_IntegralToFixedPoint:
+  case CK_FloatingToDecimalFloat:
+  case CK_DecimalFloatToFloating:
+  case CK_DecimalFloatCast:
+  case CK_DecimalFloatToBoolean:
+  case CK_DecimalFloatToIntegral:
+  case CK_IntegralToDecimalFloat:
   case CK_MatrixCast:
     return EmitUnsupportedLValue(E, "unexpected cast lvalue");
 

@@ -10629,6 +10629,14 @@ ExprResult TreeTransform<Derived>::TransformFixedPointLiteral(
   return E;
 }
 
+template <typename Derived>
+ExprResult TreeTransform<Derived>::TransformDecimalFloatLiteral(
+    DecimalFloatLiteral *E) {
+  return E;
+}
+
+
+
 template<typename Derived>
 ExprResult
 TreeTransform<Derived>::TransformFloatingLiteral(FloatingLiteral *E) {

@@ -816,6 +816,12 @@ Align DataLayout::getAlignment(Type *Ty, bool abi_or_pref) const {
   }
   case Type::X86_AMXTyID:
     return Align(64);
+  case Type::DecimalFloat32TyID:
+    return Align(32);
+  case Type::DecimalFloat64TyID:
+    return Align(64);
+  case Type::DecimalFloat128TyID:
+    return Align(128);
   default:
     llvm_unreachable("Bad type for getAlignment!!!");
   }

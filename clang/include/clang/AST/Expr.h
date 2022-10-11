@@ -1500,6 +1500,20 @@ public:
   }
 };
 
+class APDecimalFloatStorage : private APNumericStorage {
+public:
+  llvm::APDecimalFloat getValue(const llvm::decFltSemantics &Semantics) const {
+    return llvm::APDecimalFloat(getIntValue(),Semantics);
+  }
+  void setValue(const ASTContext &C, const llvm::APDecimalFloat &Val) {
+    setIntValue(C, Val.bitcastToAPInt());
+  }
+  void setValue(const ASTContext &C, const llvm::APInt &Val) {
+    setIntValue(C, Val);
+  }
+};
+
+
 class IntegerLiteral : public Expr, public APIntStorage {
   SourceLocation Loc;
 
@@ -1580,6 +1594,56 @@ class FixedPointLiteral : public Expr, public APIntStorage {
   }
 
   std::string getValueAsString(unsigned Radix) const;
+
+  // Iterators
+  child_range children() {
+    return child_range(child_iterator(), child_iterator());
+  }
+  const_child_range children() const {
+    return const_child_range(const_child_iterator(), const_child_iterator());
+  }
+};
+
+class DecimalFloatLiteral : public Expr, public APDecimalFloatStorage {
+  SourceLocation Loc;
+  unsigned  width = 32;
+
+  /// \brief Construct an empty fixed-point literal.
+  explicit DecimalFloatLiteral(EmptyShell Empty)
+      : Expr(DecimalFloatLiteralClass, Empty) {}
+
+ public:
+  DecimalFloatLiteral(const ASTContext &C, const llvm::APDecimalFloat &V, QualType type,
+                    SourceLocation l, unsigned width = 32 );
+
+  
+  /// Returns an empty fixed-point literal.
+  static DecimalFloatLiteral *Create(const ASTContext &C, EmptyShell Empty);
+
+  SourceLocation getBeginLoc() const LLVM_READONLY { return Loc; }
+  SourceLocation getEndLoc() const LLVM_READONLY { return Loc; }
+
+  /// \brief Retrieve the location of the literal.
+  SourceLocation getLocation() const { return Loc; }
+  
+  void setLocation(SourceLocation Location) { Loc = Location; }
+
+  llvm::decFltSemantics getSemantics() const {
+    return {width};
+  }
+
+  llvm::APDecimalFloat getValue() const {
+    return APDecimalFloatStorage::getValue(getSemantics());
+  }
+
+  void setWidth(unsigned Width) { width = Width;}
+  unsigned getWidth() { return width; }
+  
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == DecimalFloatLiteralClass;
+  }
+
+  std::string getValueAsString() const;
 
   // Iterators
   child_range children() {

@@ -1321,6 +1321,19 @@ void StmtPrinter::VisitFixedPointLiteral(FixedPointLiteral *Node) {
   }
 }
 
+void StmtPrinter::VisitDecimalFloatLiteral(DecimalFloatLiteral *Node) {
+  if (Policy.ConstantsAsWritten && printExprAsWritten(OS, Node, Context))
+    return;
+  OS << Node->getValueAsString();
+
+  switch (Node->getType()->castAs<BuiltinType>()->getKind()) {
+    default: llvm_unreachable("Unexpected type for decimal float literal!");
+    case BuiltinType::DecimalFloat32:   OS << "DF"; break;
+    case BuiltinType::DecimalFloat64:   OS << "DD"; break;
+    case BuiltinType::DecimalFloat128:  OS << "DL"; break;
+  }
+}
+
 static void PrintFloatingLiteral(raw_ostream &OS, FloatingLiteral *Node,
                                  bool PrintSuffix) {
   SmallString<16> Str;

@@ -327,6 +327,11 @@ APValue::APValue(const APValue &RHS) : Kind(None) {
     MakeFixedPoint(std::move(FXCopy));
     break;
   }
+  case DecimalFloat: {
+    APDecimalFloat DFCopy = RHS.getDecimalFloat();
+    MakeDecimalFloat(std::move(DFCopy));
+    break;
+  }
   case Vector:
     MakeVector();
     setVector(((const Vec *)(const char *)&RHS.Data)->Elts,
@@ -405,6 +410,8 @@ void APValue::DestroyDataAndMakeUninit() {
     ((APFloat *)(char *)&Data)->~APFloat();
   else if (Kind == FixedPoint)
     ((APFixedPoint *)(char *)&Data)->~APFixedPoint();
+  else if (Kind == DecimalFloat)
+    ((APDecimalFloat *)(char *)&Data)->~APDecimalFloat();
   else if (Kind == Vector)
     ((Vec *)(char *)&Data)->~Vec();
   else if (Kind == ComplexInt)
@@ -443,6 +450,8 @@ bool APValue::needsCleanup() const {
     return getFloat().needsCleanup();
   case FixedPoint:
     return getFixedPoint().getValue().needsCleanup();
+  case DecimalFloat:
+    return getDecimalFloat().needsCleanup();
   case ComplexFloat:
     assert(getComplexFloatImag().needsCleanup() ==
                getComplexFloatReal().needsCleanup() &&
@@ -578,6 +587,10 @@ void APValue::Profile(llvm::FoldingSetNodeID &ID) const {
 
   case FixedPoint:
     profileIntValue(ID, getFixedPoint().getValue());
+    return;
+
+  case DecimalFloat:
+    profileIntValue(ID, getDecimalFloat().bitcastToAPInt());
     return;
 
   case ComplexFloat:
@@ -720,6 +733,9 @@ void APValue::printPretty(raw_ostream &Out, const PrintingPolicy &Policy,
     return;
   case APValue::FixedPoint:
     Out << getFixedPoint();
+    return;
+  case APValue::DecimalFloat:
+    Out << getDecimalFloat();
     return;
   case APValue::Vector: {
     Out << '{';
@@ -1121,6 +1137,7 @@ LinkageInfo LinkageComputer::getLVForValue(const APValue &V,
   case APValue::Int:
   case APValue::Float:
   case APValue::FixedPoint:
+  case APValue::DecimalFloat:
   case APValue::ComplexInt:
   case APValue::ComplexFloat:
   case APValue::Vector:

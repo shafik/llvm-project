@@ -3031,6 +3031,15 @@ void CXXNameMangler::mangleType(const BuiltinType *T) {
   case BuiltinType::Half:
     Out << "Dh";
     break;
+  case BuiltinType::DecimalFloat64:
+    Out << "Dd";
+    break; 
+  case BuiltinType::DecimalFloat128:
+    Out << "De";
+    break; 
+  case BuiltinType::DecimalFloat32:
+    Out << "Df";
+    break;
   case BuiltinType::Float:
     Out << 'f';
     break;

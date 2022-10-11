@@ -77,8 +77,10 @@
 namespace llvm {
 
 class APFixedPoint;
+class APDecimalFloat;
 class FixedPointSemantics;
 struct fltSemantics;
+struct decFltSemantics;
 template <typename T, unsigned N> class SmallPtrSet;
 
 } // namespace llvm
@@ -1117,6 +1119,8 @@ public:
   CanQualType UnsignedCharTy, UnsignedShortTy, UnsignedIntTy, UnsignedLongTy;
   CanQualType UnsignedLongLongTy, UnsignedInt128Ty;
   CanQualType FloatTy, DoubleTy, LongDoubleTy, Float128Ty, Ibm128Ty;
+  CanQualType DecimalFloat32Ty, DecimalFloat64Ty, DecimalFloat128Ty; // ISO/IEC TS 18661-2:2015 C23 conditionally supported
+                                                                     // ISO/IEC TR 24733:2011 C++ support
   CanQualType ShortAccumTy, AccumTy,
       LongAccumTy;  // ISO/IEC JTC1 SC22 WG14 N1169 Extension
   CanQualType UnsignedShortAccumTy, UnsignedAccumTy, UnsignedLongAccumTy;
@@ -2186,6 +2190,10 @@ public:
   llvm::FixedPointSemantics getFixedPointSemantics(QualType Ty) const;
   llvm::APFixedPoint getFixedPointMax(QualType Ty) const;
   llvm::APFixedPoint getFixedPointMin(QualType Ty) const;
+
+  llvm::decFltSemantics getDecimalFloatSemantics(QualType Ty) const;
+  llvm::APDecimalFloat getDecimalFloatMax(QualType Ty) const;
+  llvm::APDecimalFloat getDecimalFloatMin(QualType Ty) const;
 
   DeclarationNameInfo getNameForTemplate(TemplateName Name,
                                          SourceLocation NameLoc) const;

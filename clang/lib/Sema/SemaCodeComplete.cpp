@@ -1748,9 +1748,9 @@ static void AddTypeSpecifierResults(const LangOptions &LangOpts,
   // GNU keywords
   if (LangOpts.GNUKeywords) {
     // FIXME: Enable when we actually support decimal floating point.
-    //    Results.AddResult(Result("_Decimal32"));
-    //    Results.AddResult(Result("_Decimal64"));
-    //    Results.AddResult(Result("_Decimal128"));
+       Results.AddResult(Result("_Decimal32"));
+       Results.AddResult(Result("_Decimal64"));
+       Results.AddResult(Result("_Decimal128"));
 
     Builder.AddTypedTextChunk("typeof");
     Builder.AddChunk(CodeCompletionString::CK_HorizontalSpace);

@@ -225,9 +225,34 @@ CAST_OPERATION(FixedPointToIntegral)
 ///    (_Accum) 2
 CAST_OPERATION(IntegralToFixedPoint)
 
-/// CK_FixedPointToBoolean - Fixed point to boolean.
+/// CK_FixedPointToBoolean - Decimal Float to boolean.
 ///    (bool) 0.5r
 CAST_OPERATION(FixedPointToBoolean)
+
+/// CK_FloatingToDecimalFloat - Floating to Decimal Float.
+///    _Accum a = f;
+CAST_OPERATION(FloatingToDecimalFloat)
+
+/// CK_DecimalFloatToFloating - Decimal Float to floating.
+///    (float) 2.5k
+CAST_OPERATION(DecimalFloatToFloating)
+
+/// CK_DecimalFloatCast - Decimal Float to Decimal Float.
+///    (_Accum) 0.5r
+CAST_OPERATION(DecimalFloatCast)
+
+/// CK_DecimalFloatToIntegral - Decimal Float to integral.
+///    (int) 2.0k
+CAST_OPERATION(DecimalFloatToIntegral)
+
+/// CK_IntegralToDecimalFloat - Integral to a Decimal Float.
+///    (_Accum) 2
+CAST_OPERATION(IntegralToDecimalFloat)
+
+/// CK_DecimalFloatToBoolean - Decimal Float to boolean.
+///    (bool) 0.5r
+CAST_OPERATION(DecimalFloatToBoolean)
+
 
 /// CK_FloatingToIntegral - Floating point to integral.  Rounds
 /// towards zero, discarding any fractional component.

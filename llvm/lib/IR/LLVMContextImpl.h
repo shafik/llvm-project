@@ -1465,6 +1465,7 @@ public:
   Type VoidTy, LabelTy, HalfTy, BFloatTy, FloatTy, DoubleTy, MetadataTy,
       TokenTy;
   Type X86_FP80Ty, FP128Ty, PPC_FP128Ty, X86_MMXTy, X86_AMXTy;
+  Type DecimalFloat32Ty, DecimalFloat64Ty, DecimalFloat128Ty;
   IntegerType Int1Ty, Int8Ty, Int16Ty, Int32Ty, Int64Ty, Int128Ty;
 
   std::unique_ptr<ConstantTokenNone> TheNoneToken;

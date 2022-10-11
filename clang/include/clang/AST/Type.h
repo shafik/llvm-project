@@ -30,6 +30,7 @@
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/Specifiers.h"
 #include "clang/Basic/Visibility.h"
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -2491,6 +2492,10 @@ public:
   /// Return true if this is a fixed point type according to
   /// ISO/IEC JTC1 SC22 WG14 N1169.
   bool isFixedPointType() const;
+
+  /// Return true if this is a decimal float type according to
+  /// ISO/IEC TS 18661-2:2015
+  bool isDecimalFloatType() const;
 
   /// Return true if this is a fixed point or integer type.
   bool isFixedPointOrIntegerType() const;
@@ -7275,6 +7280,15 @@ inline bool Type::isFixedPointType() const {
   return false;
 }
 
+inline bool Type::isDecimalFloatType() const {
+  if (const auto *BT = dyn_cast<BuiltinType>(CanonicalType)) {
+    return BT->getKind() >= BuiltinType::DecimalFloat32 &&
+           BT->getKind() <= BuiltinType::DecimalFloat128 ;
+  }
+  return false;
+}
+
+
 inline bool Type::isFixedPointOrIntegerType() const {
   return isFixedPointType() || isIntegerType();
 }
@@ -7532,6 +7546,8 @@ QualType DecayedType::getPointeeType() const {
 // APFixedPoint instead of APSInt and scale.
 void FixedPointValueToString(SmallVectorImpl<char> &Str, llvm::APSInt Val,
                              unsigned Scale);
+
+void DecimalFloatValueToString(SmallVectorImpl<char> &Str, llvm::APDecimalFloat Val);
 
 } // namespace clang
 
