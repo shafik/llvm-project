@@ -42,6 +42,7 @@ LLVMContextImpl::LLVMContextImpl(LLVMContext &C)
       VoidTy(C, Type::VoidTyID), LabelTy(C, Type::LabelTyID),
       HalfTy(C, Type::HalfTyID), BFloatTy(C, Type::BFloatTyID),
       FloatTy(C, Type::FloatTyID), DoubleTy(C, Type::DoubleTyID),
+      DecimalFloat32Ty(C, Type::DecimalFloat32TyID), DecimalFloat64Ty(C, Type::DecimalFloat64TyID), DecimalFloat128Ty(C, Type::DecimalFloat128TyID),
       MetadataTy(C, Type::MetadataTyID), TokenTy(C, Type::TokenTyID),
       X86_FP80Ty(C, Type::X86_FP80TyID), FP128Ty(C, Type::FP128TyID),
       PPC_FP128Ty(C, Type::PPC_FP128TyID), X86_MMXTy(C, Type::X86_MMXTyID),

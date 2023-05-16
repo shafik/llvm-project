@@ -73,6 +73,12 @@ TargetInfo::TargetInfo(const llvm::Triple &T) : Triple(T) {
   LongWidth = LongAlign = 32;
   LongLongWidth = LongLongAlign = 64;
   Int128Align = 128;
+  DecimalFloat32Width = 32;
+  DecimalFloat32Align = 32;
+	DecimalFloat64Width = 64;
+  DecimalFloat64Align = 64;
+	DecimalFloat128Width = 128;
+  DecimalFloat128Align = 128;
 
   // Fixed point default bit widths
   ShortAccumWidth = ShortAccumAlign = 16;

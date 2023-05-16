@@ -1086,6 +1086,8 @@ public:
   CanQualType SignedCharTy, ShortTy, IntTy, LongTy, LongLongTy, Int128Ty;
   CanQualType UnsignedCharTy, UnsignedShortTy, UnsignedIntTy, UnsignedLongTy;
   CanQualType UnsignedLongLongTy, UnsignedInt128Ty;
+  CanQualType DecimalFloat32Ty, DecimalFloat64Ty, DecimalFloat128Ty; // ISO/IEC TS 18661-2:2015 C23 conditionally supported
+                                                                     // ISO/IEC TR 24733:2011 C++ support
   CanQualType FloatTy, DoubleTy, LongDoubleTy, Float128Ty, Ibm128Ty;
   CanQualType ShortAccumTy, AccumTy,
       LongAccumTy;  // ISO/IEC JTC1 SC22 WG14 N1169 Extension

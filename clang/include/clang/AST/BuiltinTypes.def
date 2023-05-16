@@ -168,6 +168,15 @@ SIGNED_TYPE(SatAccum, SatAccumTy)
 // '_Sat long _Accum'
 SIGNED_TYPE(SatLongAccum, SatLongAccumTy)
 
+// '_Decimal32'
+SIGNED_TYPE(DecimalFloat32, DecimalFloat32Ty)
+
+// '_Decimal64'
+SIGNED_TYPE(DecimalFloat64, DecimalFloat64Ty)
+
+// '_Decimal128'
+SIGNED_TYPE(DecimalFloat128, DecimalFloat128Ty)
+
 // '_Sat unsigned short _Accum'
 UNSIGNED_TYPE(SatUShortAccum, SatUnsignedShortAccumTy)
 

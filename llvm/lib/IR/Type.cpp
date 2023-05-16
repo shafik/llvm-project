@@ -233,6 +233,9 @@ Type *Type::getHalfTy(LLVMContext &C) { return &C.pImpl->HalfTy; }
 Type *Type::getBFloatTy(LLVMContext &C) { return &C.pImpl->BFloatTy; }
 Type *Type::getFloatTy(LLVMContext &C) { return &C.pImpl->FloatTy; }
 Type *Type::getDoubleTy(LLVMContext &C) { return &C.pImpl->DoubleTy; }
+Type *Type::getDecimalFloat32Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat32Ty; }
+Type *Type::getDecimalFloat64Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat64Ty; }
+Type *Type::getDecimalFloat128Ty(LLVMContext &C) { return &C.pImpl->DecimalFloat128Ty; }
 Type *Type::getMetadataTy(LLVMContext &C) { return &C.pImpl->MetadataTy; }
 Type *Type::getTokenTy(LLVMContext &C) { return &C.pImpl->TokenTy; }
 Type *Type::getX86_FP80Ty(LLVMContext &C) { return &C.pImpl->X86_FP80Ty; }

@@ -1267,6 +1267,10 @@ void ASTContext::InitBuiltinTypes(const TargetInfo &Target,
   InitBuiltinType(LongTy,              BuiltinType::Long);
   InitBuiltinType(LongLongTy,          BuiltinType::LongLong);
 
+  InitBuiltinType(DecimalFloat32Ty, BuiltinType::DecimalFloat32);
+  InitBuiltinType(DecimalFloat64Ty, BuiltinType::DecimalFloat64);
+  InitBuiltinType(DecimalFloat128Ty, BuiltinType::DecimalFloat128);
+
   // C99 6.2.5p6.
   InitBuiltinType(UnsignedCharTy,      BuiltinType::UChar);
   InitBuiltinType(UnsignedShortTy,     BuiltinType::UShort);
@@ -2093,6 +2097,18 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
       Width = 128;
       Align = Target->getInt128Align();
       break;
+    case BuiltinType::DecimalFloat32:
+      Width = Target->getDecimalFloat32Width();
+      Align = Target->getDecimalFloat32Align();
+      break;
+    case BuiltinType::DecimalFloat64:
+      Width = Target->getDecimalFloat64Width();
+      Align = Target->getDecimalFloat64Align();
+      break;
+    case BuiltinType::DecimalFloat128:
+      Width = Target->getDecimalFloat128Width();
+      Align = Target->getDecimalFloat128Align();
+      break;  
     case BuiltinType::ShortAccum:
     case BuiltinType::UShortAccum:
     case BuiltinType::SatShortAccum:

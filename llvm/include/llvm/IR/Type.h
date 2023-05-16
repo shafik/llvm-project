@@ -57,6 +57,9 @@ public:
     BFloatTyID,    ///< 16-bit floating point type (7-bit significand)
     FloatTyID,     ///< 32-bit floating point type
     DoubleTyID,    ///< 64-bit floating point type
+    DecimalFloat32TyID,
+    DecimalFloat64TyID,
+    DecimalFloat128TyID,
     X86_FP80TyID,  ///< 80-bit floating point type (X87)
     FP128TyID,     ///< 128-bit floating point type (112-bit significand)
     PPC_FP128TyID, ///< 128-bit floating point type (two 64-bits, PowerPC)
@@ -305,7 +308,7 @@ public:
     // If it's a primitive, it is always sized.
     if (getTypeID() == IntegerTyID || isFloatingPointTy() ||
         getTypeID() == PointerTyID || getTypeID() == X86_MMXTyID ||
-        getTypeID() == X86_AMXTyID)
+        getTypeID() == X86_AMXTyID || getTypeID() == DecimalFloat32TyID || getTypeID() == DecimalFloat64TyID || getTypeID() == DecimalFloat128TyID)
       return true;
     // If it is not something that can have a size (e.g. a function or label),
     // it doesn't have a size.
@@ -462,6 +465,9 @@ public:
   static Type *getBFloatTy(LLVMContext &C);
   static Type *getFloatTy(LLVMContext &C);
   static Type *getDoubleTy(LLVMContext &C);
+  static Type *getDecimalFloat32Ty(LLVMContext &C);
+  static Type *getDecimalFloat64Ty(LLVMContext &C);
+  static Type *getDecimalFloat128Ty(LLVMContext &C);
   static Type *getMetadataTy(LLVMContext &C);
   static Type *getX86_FP80Ty(LLVMContext &C);
   static Type *getFP128Ty(LLVMContext &C);

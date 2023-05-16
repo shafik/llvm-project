@@ -539,7 +539,15 @@ llvm::Type *CodeGenTypes::ConvertType(QualType T) {
                                     Context.getFloatTypeSemantics(T),
                                     /* UseNativeHalf = */ false);
       break;
-
+    case BuiltinType::DecimalFloat32:
+      ResultType = llvm::Type::getDecimalFloat32Ty(getLLVMContext());
+      break;
+    case BuiltinType::DecimalFloat64:
+      ResultType = llvm::Type::getDecimalFloat64Ty(getLLVMContext());
+      break;
+    case BuiltinType::DecimalFloat128:
+      ResultType = llvm::Type::getDecimalFloat128Ty(getLLVMContext());
+      break;
     case BuiltinType::NullPtr:
       // Model std::nullptr_t as i8*
       ResultType = llvm::Type::getInt8PtrTy(getLLVMContext());

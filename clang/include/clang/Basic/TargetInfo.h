@@ -94,6 +94,10 @@ struct TransferrableTargetInfo {
   unsigned char LongLongWidth, LongLongAlign;
   unsigned char Int128Align;
 
+  unsigned char DecimalFloat32Width, DecimalFloat32Align;
+  unsigned char DecimalFloat64Width, DecimalFloat64Align;
+  unsigned char DecimalFloat128Width, DecimalFloat128Align;
+
   // Fixed point bit widths
   unsigned char ShortAccumWidth, ShortAccumAlign;
   unsigned char AccumWidth, AccumAlign;
@@ -701,6 +705,21 @@ public:
   /// bits.
   unsigned getChar32Width() const { return getTypeWidth(Char32Type); }
   unsigned getChar32Align() const { return getTypeAlign(Char32Type); }
+
+  /// DecimalFloat32Width/Align/Format - Return the size/align/format of
+  /// '_Decimal32'.
+  unsigned getDecimalFloat32Width() const { return DecimalFloat32Width; }
+  unsigned getDecimalFloat32Align() const { return DecimalFloat32Align; }
+
+  /// DecimalFloat64Width/Align/Format - Return the size/align/format of
+  /// '_Decimal64'.
+  unsigned getDecimalFloat64Width() const { return DecimalFloat64Width; }
+  unsigned getDecimalFloat64Align() const { return DecimalFloat64Align; }
+
+  /// DecimalFloat128Width/Align/Format - Return the size/align/format of
+  /// '_Decimal128'.
+  unsigned getDecimalFloat128Width() const { return DecimalFloat128Width; }
+  unsigned getDecimalFloat128Align() const { return DecimalFloat128Align; }
 
   /// getHalfWidth/Align/Format - Return the size/align/format of 'half'.
   unsigned getHalfWidth() const { return HalfWidth; }
