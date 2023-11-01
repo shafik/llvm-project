@@ -1024,12 +1024,21 @@ DecimalFloatLiteral::DecimalFloatLiteral(const ASTContext &C, const llvm::APDeci
   setDependence(ExprDependence::None);
 }
 
+DecimalFloatLiteral *DecimalFloatLiteral::Create(const ASTContext &C,
+                                                 EmptyShell Empty) {
+  return new (C) DecimalFloatLiteral(Empty);
+}
+
+DecimalFloatLiteral *DecimalFloatLiteral::CreateFromAPDecimalFloat(
+    const ASTContext &C, llvm::APDecimalFloat Val, QualType type,
+    SourceLocation l, unsigned width) {
+  return new (C) DecimalFloatLiteral(C, Val, type, l, width);
+}
+
 std::string DecimalFloatLiteral::getValueAsString() const {
-  // Currently the longest decimal number that can be printed is the max for an
-  // unsigned long _Accum: 4294967295.99999999976716935634613037109375
-  // which is 43 characters.
   SmallString<64> S;
-  DecimalFloatValueToString(S,getValue());
+  DecimalFloatValueToString(S,
+                            llvm::APDecimalFloat(getValue(), getSemantics()));
   return std::string(S.str());
 }
 
@@ -1942,6 +1951,7 @@ bool CastExpr::CastConsistency() const {
   case CK_FloatingToBoolean:
   case CK_MemberPointerToBoolean:
   case CK_FloatingComplexToBoolean:
+  case CK_DecimalFloatToBoolean:
   case CK_IntegralComplexToBoolean:
   case CK_LValueBitCast:            // -> bool&
   case CK_LValueToRValueBitCast:

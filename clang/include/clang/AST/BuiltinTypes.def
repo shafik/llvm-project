@@ -218,17 +218,20 @@ FLOATING_TYPE(BFloat16, BFloat16Ty)
 // '__float128'
 FLOATING_TYPE(Float128, Float128Ty)
 
-// '_Decimal32'
-FLOATING_TYPE(DecimalFloat32, DecimalFloat32Ty)
-
-// '_Decimal64'
-FLOATING_TYPE(DecimalFloat64, DecimalFloat64Ty)
-
-// '_Decimal128'
-FLOATING_TYPE(DecimalFloat128, DecimalFloat128Ty)
-
 // '__ibm128'
 FLOATING_TYPE(Ibm128, Ibm128Ty)
+
+// Putting Decimal Float types below IBM128Ty so that BuiltinType::isFloatingPoint() does
+// not return true
+//
+// '_Decimal32'
+SIGNED_TYPE(DecimalFloat32, DecimalFloat32Ty)
+
+// '_Decimal64'
+SIGNED_TYPE(DecimalFloat64, DecimalFloat64Ty)
+
+// '_Decimal128'
+SIGNED_TYPE(DecimalFloat128, DecimalFloat128Ty)
 
 //===- Language-specific types --------------------------------------------===//
 

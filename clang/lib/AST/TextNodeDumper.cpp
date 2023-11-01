@@ -414,6 +414,7 @@ static bool isSimpleAPValue(const APValue &Value) {
   case APValue::Int:
   case APValue::Float:
   case APValue::FixedPoint:
+  case APValue::DecimalFloat:
   case APValue::ComplexInt:
   case APValue::ComplexFloat:
   case APValue::LValue:
@@ -504,6 +505,13 @@ void TextNodeDumper::Visit(const APValue &Value, QualType Ty) {
     {
       ColorScope Color(OS, ShowColors, ValueColor);
       OS << Value.getFixedPoint();
+    }
+    return;
+  case APValue::DecimalFloat:
+    OS << "DecimalFloat ";
+    {
+      ColorScope Color(OS, ShowColors, ValueColor);
+      OS << Value.getDecimalFloat();
     }
     return;
   case APValue::Vector: {
@@ -1097,6 +1105,11 @@ void TextNodeDumper::VisitIntegerLiteral(const IntegerLiteral *Node) {
 void TextNodeDumper::VisitFixedPointLiteral(const FixedPointLiteral *Node) {
   ColorScope Color(OS, ShowColors, ValueColor);
   OS << " " << Node->getValueAsString(/*Radix=*/10);
+}
+
+void TextNodeDumper::VisitDecimalFloatLiteral(const DecimalFloatLiteral *Node) {
+  ColorScope Color(OS, ShowColors, ValueColor);
+  OS << " " << Node->getValueAsString();
 }
 
 void TextNodeDumper::VisitFloatingLiteral(const FloatingLiteral *Node) {

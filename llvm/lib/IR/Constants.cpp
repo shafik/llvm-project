@@ -351,6 +351,8 @@ Constant *Constant::getNullValue(Type *Ty) {
   switch (Ty->getTypeID()) {
   case Type::IntegerTyID:
     return ConstantInt::get(Ty, 0);
+  case Type::DecimalFloat32TyID:
+    return ConstantInt::DecimalFloatGet(Ty);
   case Type::HalfTyID:
   case Type::BFloatTyID:
   case Type::FloatTyID:
@@ -917,6 +919,14 @@ ConstantInt *ConstantInt::get(IntegerType* Ty, StringRef Str, uint8_t radix) {
 /// Remove the constant from the constant table.
 void ConstantInt::destroyConstantImpl() {
   llvm_unreachable("You can't ConstantInt->destroyConstantImpl()!");
+}
+
+//
+// Decimal Float
+//
+
+ConstantInt *ConstantInt::DecimalFloatGet(Type *Ty) {
+  return get(Ty->getContext(), APInt(32, 0, /*isSigned=*/false));
 }
 
 //===----------------------------------------------------------------------===//

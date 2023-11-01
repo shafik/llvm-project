@@ -13273,7 +13273,9 @@ llvm::APFixedPoint ASTContext::getFixedPointMin(QualType Ty) const {
 llvm::decFltSemantics ASTContext::getDecimalFloatSemantics(QualType Ty) const{
   assert(Ty->isDecimalFloatType());
 
-  return llvm::decFltSemantics(static_cast<unsigned>(getTypeSize(Ty)));
+  return llvm::decFltSemantics(
+      static_cast<unsigned>(getTypeSize(Ty)), /*Scale=*/1u, /*IsSigned=*/0u,
+      /*IsSaturated=*/false, /*HasUnsignedPadding=*/false);
 }
 
 llvm::APDecimalFloat ASTContext::getDecimalFloatMax(QualType Ty) const {

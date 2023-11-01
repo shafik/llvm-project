@@ -711,7 +711,8 @@ void USRGenerator::VisitType(QualType T) {
         case BuiltinType::LongDouble:
           c = 'D'; break;
         case BuiltinType::Float128:
-          c = 'Q'; break;
+          c = 'Q';
+          break;
         case BuiltinType::NullPtr:
           c = 'n'; break;
 #define BUILTIN_TYPE(Id, SingletonId)
@@ -762,6 +763,9 @@ void USRGenerator::VisitType(QualType T) {
         case BuiltinType::SatUFract:
         case BuiltinType::SatULongFract:
         case BuiltinType::BFloat16:
+        case BuiltinType::DecimalFloat32:
+        case BuiltinType::DecimalFloat64:
+        case BuiltinType::DecimalFloat128:
           IgnoreResults = true;
           return;
         case BuiltinType::ObjCId:

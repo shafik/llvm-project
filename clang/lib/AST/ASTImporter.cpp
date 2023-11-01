@@ -9783,6 +9783,7 @@ ASTNodeImporter::ImportAPValue(const APValue &FromValue) {
   case APValue::Int:
   case APValue::Float:
   case APValue::FixedPoint:
+  case APValue::DecimalFloat:
   case APValue::ComplexInt:
   case APValue::ComplexFloat:
     Result = FromValue;

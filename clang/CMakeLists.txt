@@ -10,6 +10,9 @@ endif()
 # Must go below project(..)
 include(GNUInstallDirs)
 
+list(APPEND CMAKE_REQUIRED_INCLUDES "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/src")
+list(APPEND CMAKE_REQUIRED_LIBRARIES "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/libbid.a")
+
 if(CLANG_BUILT_STANDALONE)
   set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
   set(CMAKE_CXX_STANDARD_REQUIRED YES)
@@ -998,6 +1001,8 @@ endif()
 
 set(CLANG_INSTALL_LIBDIR_BASENAME "lib${CLANG_LIBDIR_SUFFIX}")
 
+
 configure_file(
   ${CLANG_SOURCE_DIR}/include/clang/Config/config.h.cmake
   ${CLANG_BINARY_DIR}/include/clang/Config/config.h)
+

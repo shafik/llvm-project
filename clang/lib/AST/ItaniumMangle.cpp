@@ -4960,6 +4960,10 @@ recurse:
     mangleFixedPointLiteral();
     break;
 
+  case Expr::DecimalFloatLiteralClass:
+    mangleType(E->getType());
+    break;
+
   case Expr::CharacterLiteralClass:
     // <expr-primary>
     Out << 'L';
@@ -5553,6 +5557,9 @@ static bool isZeroInitialized(QualType T, const APValue &V) {
   case APValue::Float:
     return V.getFloat().isPosZero();
 
+  case APValue::DecimalFloat:
+    return V.getDecimalFloat().isZero();
+
   case APValue::FixedPoint:
     return !V.getFixedPoint().getValue();
 
@@ -5767,6 +5774,10 @@ void CXXNameMangler::mangleValueInTemplateArg(QualType T, const APValue &V,
 
   case APValue::Float:
     mangleFloatLiteral(T, V.getFloat());
+    break;
+
+  case APValue::DecimalFloat:
+    mangleType(T);
     break;
 
   case APValue::FixedPoint:

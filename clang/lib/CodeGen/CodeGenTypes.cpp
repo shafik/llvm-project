@@ -541,13 +541,16 @@ llvm::Type *CodeGenTypes::ConvertType(QualType T) {
       break;
 
     case BuiltinType::DecimalFloat32:
-      ResultType = llvm::Type::getDecimalFloat32Ty(getLLVMContext());
+      // ResultType = llvm::Type::getDecimalFloat32Ty(getLLVMContext());
+      ResultType = llvm::IntegerType::get(getLLVMContext(), 32);
       break;
     case BuiltinType::DecimalFloat64:
-      ResultType = llvm::Type::getDecimalFloat64Ty(getLLVMContext());
+      // ResultType = llvm::Type::getDecimalFloat64Ty(getLLVMContext());
+      ResultType = llvm::IntegerType::get(getLLVMContext(), 64);
       break;
     case BuiltinType::DecimalFloat128:
-      ResultType = llvm::Type::getDecimalFloat128Ty(getLLVMContext());
+      // ResultType = llvm::Type::getDecimalFloat128Ty(getLLVMContext());
+      ResultType = llvm::IntegerType::get(getLLVMContext(), 128);
       break;
     case BuiltinType::NullPtr:
       // Model std::nullptr_t as i8*

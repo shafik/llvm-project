@@ -2151,9 +2151,11 @@ bool Type::isRealType() const {
 
 bool Type::isArithmeticType() const {
   if (const auto *BT = dyn_cast<BuiltinType>(CanonicalType))
-    return BT->getKind() >= BuiltinType::Bool &&
-           BT->getKind() <= BuiltinType::Ibm128 &&
-           BT->getKind() != BuiltinType::BFloat16;
+    return (BT->getKind() >= BuiltinType::Bool &&
+            BT->getKind() <= BuiltinType::Ibm128 &&
+            BT->getKind() != BuiltinType::BFloat16) ||
+           (BT->getKind() >= BuiltinType::DecimalFloat32 &&
+            BT->getKind() <= BuiltinType::DecimalFloat128);
   if (const auto *ET = dyn_cast<EnumType>(CanonicalType))
     // GCC allows forward declaration of enum types (forbid by C99 6.7.2.3p2).
     // If a body isn't seen by the time we get here, return false.
@@ -2611,7 +2613,7 @@ bool Type::isLiteralType(const ASTContext &Ctx) const {
   // As an extension, Clang treats vector types and complex types as
   // literal types.
   if (BaseTy->isScalarType() || BaseTy->isVectorType() ||
-      BaseTy->isAnyComplexType())
+      BaseTy->isAnyComplexType() || BaseTy->isDecimalFloatType())
     return true;
   //    -- a reference type; or
   if (BaseTy->isReferenceType())

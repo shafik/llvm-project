@@ -2086,6 +2086,9 @@ llvm::Constant *ConstantEmitter::tryEmitPrivate(const APValue &Value,
   case APValue::FixedPoint:
     return llvm::ConstantInt::get(CGM.getLLVMContext(),
                                   Value.getFixedPoint().getValue());
+  case APValue::DecimalFloat:
+    return llvm::ConstantInt::get(CGM.getLLVMContext(),
+                                  Value.getDecimalFloat().getValue());
   case APValue::ComplexInt: {
     llvm::Constant *Complex[2];
 

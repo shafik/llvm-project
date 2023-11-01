@@ -20,6 +20,7 @@
 #ifndef LLVM_IR_CONSTANTS_H
 #define LLVM_IR_CONSTANTS_H
 
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -126,6 +127,8 @@ public:
   /// If Ty is a vector type, return a Constant with a splat of the given
   /// value. Otherwise return a ConstantInt for the given value.
   static Constant *get(Type *Ty, const APInt &V);
+
+  static ConstantInt *DecimalFloatGet(Type *Ty);
 
   /// Return the constant as an APInt value reference. This allows clients to
   /// obtain a full-precision copy of the value.

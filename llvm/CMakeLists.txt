@@ -15,6 +15,9 @@ endif()
 
 set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 
+list(APPEND CMAKE_REQUIRED_INCLUDES "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/src")
+list(APPEND CMAKE_REQUIRED_LIBRARIES "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/libbid.a")
+
 if(NOT DEFINED LLVM_VERSION_MAJOR)
   set(LLVM_VERSION_MAJOR 16)
 endif()
@@ -1077,11 +1080,11 @@ set_target_properties(srpm PROPERTIES FOLDER "Misc")
 
 if(APPLE AND DARWIN_LTO_LIBRARY)
   set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
+    "${CMAKE_EXE_LINKER_FLAGS} -lbid -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
   set(CMAKE_SHARED_LINKER_FLAGS
-    "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
+    "${CMAKE_SHARED_LINKER_FLAGS} -lbid -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
   set(CMAKE_MODULE_LINKER_FLAGS
-    "${CMAKE_MODULE_LINKER_FLAGS} -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
+    "${CMAKE_MODULE_LINKER_FLAGS} -lbid -Wl,-lto_library -Wl,${DARWIN_LTO_LIBRARY}")
 endif()
 
 # Build with _XOPEN_SOURCE on AIX, as stray macros in _ALL_SOURCE mode tend to

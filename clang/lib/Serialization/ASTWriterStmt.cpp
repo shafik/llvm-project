@@ -666,7 +666,8 @@ void ASTStmtWriter::VisitDecimalFloatLiteral(DecimalFloatLiteral *E) {
   VisitExpr(E);
   Record.AddSourceLocation(E->getLocation());
   Record.push_back(E->getWidth());
-  Record.AddAPInt(E->getValue().bitcastToAPInt());
+  // Record.AddAPInt(E->getValue().bitcastToAPInt());
+  Record.AddAPInt(E->getValue());
   Code = serialization::EXPR_DECIMALFLOAT_LITERAL;
 }
 

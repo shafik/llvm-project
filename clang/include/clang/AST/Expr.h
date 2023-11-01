@@ -1502,9 +1502,17 @@ public:
 
 class APDecimalFloatStorage : private APNumericStorage {
 public:
-  llvm::APDecimalFloat getValue(const llvm::decFltSemantics &Semantics) const {
-    return llvm::APDecimalFloat(getIntValue(),Semantics);
+  // llvm::APDecimalFloat
+  llvm::APInt getValue(const llvm::decFltSemantics &Semantics) const {
+    // return llvm::APDecimalFloat(getIntValue(),Semantics);
+    return getIntValue();
   }
+
+  llvm::APInt getValue() const {
+    // return llvm::APDecimalFloat(getIntValue(),Semantics);
+    return getIntValue();
+  }
+
   void setValue(const ASTContext &C, const llvm::APDecimalFloat &Val) {
     setIntValue(C, Val.bitcastToAPInt());
   }
@@ -1607,6 +1615,8 @@ class FixedPointLiteral : public Expr, public APIntStorage {
 class DecimalFloatLiteral : public Expr, public APDecimalFloatStorage {
   SourceLocation Loc;
   unsigned  width = 32;
+  unsigned scale = 1;
+  bool isSigned = false;
 
   /// \brief Construct an empty fixed-point literal.
   explicit DecimalFloatLiteral(EmptyShell Empty)
@@ -1619,6 +1629,9 @@ class DecimalFloatLiteral : public Expr, public APDecimalFloatStorage {
   
   /// Returns an empty fixed-point literal.
   static DecimalFloatLiteral *Create(const ASTContext &C, EmptyShell Empty);
+  static DecimalFloatLiteral *
+  CreateFromAPDecimalFloat(const ASTContext &C, llvm::APDecimalFloat Val,
+                           QualType type, SourceLocation l, unsigned width);
 
   SourceLocation getBeginLoc() const LLVM_READONLY { return Loc; }
   SourceLocation getEndLoc() const LLVM_READONLY { return Loc; }
@@ -1629,12 +1642,12 @@ class DecimalFloatLiteral : public Expr, public APDecimalFloatStorage {
   void setLocation(SourceLocation Location) { Loc = Location; }
 
   llvm::decFltSemantics getSemantics() const {
-    return {width};
+    return {width, scale, isSigned, false, false};
   }
 
-  llvm::APDecimalFloat getValue() const {
-    return APDecimalFloatStorage::getValue(getSemantics());
-  }
+  // llvm::APDecimalFloat getValue() const {
+  //   return APDecimalFloatStorage::getValue(getSemantics());
+  // }
 
   void setWidth(unsigned Width) { width = Width;}
   unsigned getWidth() { return width; }

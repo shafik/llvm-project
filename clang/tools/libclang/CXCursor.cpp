@@ -380,6 +380,10 @@ CXCursor cxcursor::MakeCXCursor(const Stmt *S, const Decl *Parent,
     K = CXCursor_FixedPointLiteral;
     break;
 
+  case Stmt::DecimalFloatLiteralClass:
+    K = CXCursor_DecimalFloatLiteral;
+    break;
+
   case Stmt::FloatingLiteralClass:
     K = CXCursor_FloatingLiteral;
     break;

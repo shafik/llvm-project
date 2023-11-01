@@ -174,6 +174,10 @@ public:
 
   void writedecFltSemantics(const llvm::decFltSemantics &sema) {
     asImpl().writeUInt32(sema.getWidth());
+    asImpl().writeUInt32(sema.getScale());
+    asImpl().writeBool(sema.isSigned());
+    asImpl().writeBool(sema.isSaturated());
+    asImpl().writeBool(sema.hasUnsignedPadding());
   }
 
   void writeLValuePathSerializationHelper(

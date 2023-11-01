@@ -32,6 +32,7 @@
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/DecimalFloatBuilder.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/FixedPointBuilder.h"
 #include "llvm/IR/Function.h"
@@ -140,6 +141,22 @@ struct BinOpInfo {
     }
     if (const auto *UnOp = dyn_cast<UnaryOperator>(E))
       return UnOp->getSubExpr()->getType()->isFixedPointType();
+    return false;
+  }
+
+  /// Check if at least one operand is a decimal float type. In such cases, this
+  /// operation did not follow usual arithmetic conversion and both operands
+  /// might not be of the same type.
+  bool isDecimalFloatOp() const {
+    // We cannot simply check the result type since comparison operations return
+    // an int.
+    if (const auto *BinOp = dyn_cast<BinaryOperator>(E)) {
+      QualType LHSType = BinOp->getLHS()->getType();
+      QualType RHSType = BinOp->getRHS()->getType();
+      return LHSType->isDecimalFloatType() || RHSType->isDecimalFloatType();
+    }
+    if (const auto *UnOp = dyn_cast<UnaryOperator>(E))
+      return UnOp->getSubExpr()->getType()->isDecimalFloatType();
     return false;
   }
 };
@@ -454,6 +471,11 @@ public:
   Value *VisitFixedPointLiteral(const FixedPointLiteral *E) {
     return Builder.getInt(E->getValue());
   }
+
+  Value *VisitDecimalFloatLiteral(const DecimalFloatLiteral *E) {
+    return Builder.getInt(E->getValue());
+  }
+
   Value *VisitFloatingLiteral(const FloatingLiteral *E) {
     return llvm::ConstantFP::get(VMContext, E->getValue());
   }
@@ -761,6 +783,10 @@ public:
     }
     if (Ops.isFixedPointOp())
       return EmitFixedPointBinOp(Ops);
+
+    if (Ops.isDecimalFloatOp())
+      return EmitDecimalFloatBinOp(Ops);
+
     return Builder.CreateMul(Ops.LHS, Ops.RHS, "mul");
   }
   /// Create a binary op that checks for overflow.
@@ -795,6 +821,9 @@ public:
 
   // Helper functions for fixed point binary operations.
   Value *EmitFixedPointBinOp(const BinOpInfo &Ops);
+
+  // Helper functions for decimal float binary operations.
+  Value *EmitDecimalFloatBinOp(const BinOpInfo &Ops);
 
   BinOpInfo EmitBinOps(const BinaryOperator *E,
                        QualType PromotionTy = QualType());
@@ -3480,6 +3509,8 @@ Value *ScalarExprEmitter::EmitDiv(const BinOpInfo &Ops) {
   }
   else if (Ops.isFixedPointOp())
     return EmitFixedPointBinOp(Ops);
+  else if (Ops.isDecimalFloatOp())
+    return EmitDecimalFloatBinOp(Ops);
   else if (Ops.Ty->hasUnsignedIntegerRepresentation())
     return Builder.CreateUDiv(Ops.LHS, Ops.RHS, "div");
   else
@@ -3858,6 +3889,9 @@ Value *ScalarExprEmitter::EmitAdd(const BinOpInfo &op) {
   if (op.isFixedPointOp())
     return EmitFixedPointBinOp(op);
 
+  if (op.isDecimalFloatOp())
+    return EmitDecimalFloatBinOp(op);
+
   return Builder.CreateAdd(op.LHS, op.RHS, "add");
 }
 
@@ -3967,6 +4001,110 @@ Value *ScalarExprEmitter::EmitFixedPointBinOp(const BinOpInfo &op) {
                                       ResultFixedSema);
 }
 
+Value *ScalarExprEmitter::EmitDecimalFloatBinOp(const BinOpInfo &op) {
+  using llvm::APSInt;
+  using llvm::ConstantInt;
+
+  // This is either a binary operation where at least one of the operands is
+  // a fixed-point type, or a unary operation where the operand is a fixed-point
+  // type. The result type of a binary operation is determined by
+  // Sema::handleFixedPointConversions().
+  QualType ResultTy = op.Ty;
+  QualType LHSTy, RHSTy;
+  if (const auto *BinOp = dyn_cast<BinaryOperator>(op.E)) {
+    RHSTy = BinOp->getRHS()->getType();
+    if (const auto *CAO = dyn_cast<CompoundAssignOperator>(BinOp)) {
+      // For compound assignment, the effective type of the LHS at this point
+      // is the computation LHS type, not the actual LHS type, and the final
+      // result type is not the type of the expression but rather the
+      // computation result type.
+      LHSTy = CAO->getComputationLHSType();
+      ResultTy = CAO->getComputationResultType();
+    } else
+      LHSTy = BinOp->getLHS()->getType();
+  } else if (const auto *UnOp = dyn_cast<UnaryOperator>(op.E)) {
+    LHSTy = UnOp->getSubExpr()->getType();
+    RHSTy = UnOp->getSubExpr()->getType();
+  }
+  ASTContext &Ctx = CGF.getContext();
+  Value *LHS = op.LHS;
+  Value *RHS = op.RHS;
+
+  auto LHSFixedSema = Ctx.getDecimalFloatSemantics(LHSTy);
+  auto RHSFixedSema = Ctx.getDecimalFloatSemantics(RHSTy);
+  auto ResultFixedSema = Ctx.getDecimalFloatSemantics(ResultTy);
+  auto CommonFixedSema = LHSFixedSema.getCommonSemantics(RHSFixedSema);
+
+  // Perform the actual operation.
+  Value *Result;
+  llvm::DecimalFloatBuilder<CGBuilderTy> FPBuilder(Builder);
+  switch (op.Opcode) {
+  case BO_AddAssign:
+  case BO_Add:
+    Result = FPBuilder.CreateAdd(LHS, LHSFixedSema, RHS, RHSFixedSema);
+    break;
+  case BO_SubAssign:
+  case BO_Sub:
+    Result = FPBuilder.CreateSub(LHS, LHSFixedSema, RHS, RHSFixedSema);
+    break;
+  case BO_MulAssign:
+  case BO_Mul:
+    Result = FPBuilder.CreateMul(LHS, LHSFixedSema, RHS, RHSFixedSema);
+    break;
+  case BO_DivAssign:
+  case BO_Div:
+    Result = FPBuilder.CreateDiv(LHS, LHSFixedSema, RHS, RHSFixedSema);
+    break;
+  case BO_ShlAssign:
+  case BO_Shl:
+    Result = FPBuilder.CreateShl(LHS, LHSFixedSema, RHS);
+    break;
+  case BO_ShrAssign:
+  case BO_Shr:
+    Result = FPBuilder.CreateShr(LHS, LHSFixedSema, RHS);
+    break;
+  case BO_LT:
+    return FPBuilder.CreateLT(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_GT:
+    return FPBuilder.CreateGT(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_LE:
+    return FPBuilder.CreateLE(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_GE:
+    return FPBuilder.CreateGE(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_EQ:
+    // For equality operations, we assume any padding bits on unsigned types are
+    // zero'd out. They could be overwritten through non-saturating operations
+    // that cause overflow, but this leads to undefined behavior.
+    return FPBuilder.CreateEQ(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_NE:
+    return FPBuilder.CreateNE(LHS, LHSFixedSema, RHS, RHSFixedSema);
+  case BO_Cmp:
+  case BO_LAnd:
+  case BO_LOr:
+    llvm_unreachable("Found unimplemented fixed point binary operation");
+  case BO_PtrMemD:
+  case BO_PtrMemI:
+  case BO_Rem:
+  case BO_Xor:
+  case BO_And:
+  case BO_Or:
+  case BO_Assign:
+  case BO_RemAssign:
+  case BO_AndAssign:
+  case BO_XorAssign:
+  case BO_OrAssign:
+  case BO_Comma:
+    llvm_unreachable(
+        "Found unsupported binary operation for fixed point types.");
+  }
+
+  bool IsShift = BinaryOperator::isShiftOp(op.Opcode) ||
+                 BinaryOperator::isShiftAssignOp(op.Opcode);
+  // Convert to the result type.
+  return FPBuilder.CreateFixedToFixed(
+      Result, IsShift ? LHSFixedSema : CommonFixedSema, ResultFixedSema);
+}
+
 Value *ScalarExprEmitter::EmitSub(const BinOpInfo &op) {
   // The LHS is always a pointer if either side is.
   if (!op.LHS->getType()->isPointerTy()) {
@@ -4006,6 +4144,9 @@ Value *ScalarExprEmitter::EmitSub(const BinOpInfo &op) {
 
     if (op.isFixedPointOp())
       return EmitFixedPointBinOp(op);
+
+    if (op.isDecimalFloatOp())
+      return EmitDecimalFloatBinOp(op);
 
     return Builder.CreateSub(op.LHS, op.RHS, "sub");
   }
@@ -4096,6 +4237,9 @@ Value *ScalarExprEmitter::EmitShl(const BinOpInfo &Ops) {
   if (Ops.isFixedPointOp())
     return EmitFixedPointBinOp(Ops);
 
+  if (Ops.isDecimalFloatOp())
+    return EmitDecimalFloatBinOp(Ops);
+
   // LLVM requires the LHS and RHS to be the same type: promote or truncate the
   // RHS to the same size as the LHS.
   Value *RHS = Ops.RHS;
@@ -4173,6 +4317,9 @@ Value *ScalarExprEmitter::EmitShr(const BinOpInfo &Ops) {
   // TODO: This misses out on the sanitizer check below.
   if (Ops.isFixedPointOp())
     return EmitFixedPointBinOp(Ops);
+
+  if (Ops.isDecimalFloatOp())
+    return EmitDecimalFloatBinOp(Ops);
 
   // LLVM requires the LHS and RHS to be the same type: promote or truncate the
   // RHS to the same size as the LHS.
@@ -4343,6 +4490,8 @@ Value *ScalarExprEmitter::EmitCompare(const BinaryOperator *E,
 
     if (BOInfo.isFixedPointOp()) {
       Result = EmitFixedPointBinOp(BOInfo);
+    } else if (BOInfo.isDecimalFloatOp()) {
+      Result = EmitDecimalFloatBinOp(BOInfo);
     } else if (LHS->getType()->isFPOrFPVectorTy()) {
       CodeGenFunction::CGFPOptionsRAII FPOptsRAII(CGF, BOInfo.FPFeatures);
       if (!IsSignaling)

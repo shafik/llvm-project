@@ -170,6 +170,7 @@ static Cl::Kinds ClassifyInternal(ASTContext &Ctx, const Expr *E) {
   case Expr::ConvertVectorExprClass:
   case Expr::IntegerLiteralClass:
   case Expr::FixedPointLiteralClass:
+  case Expr::DecimalFloatLiteralClass:
   case Expr::CharacterLiteralClass:
   case Expr::AddrLabelExprClass:
   case Expr::CXXDeleteExprClass:

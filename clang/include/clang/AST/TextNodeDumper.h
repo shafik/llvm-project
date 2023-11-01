@@ -258,6 +258,7 @@ public:
   void VisitCharacterLiteral(const CharacterLiteral *Node);
   void VisitIntegerLiteral(const IntegerLiteral *Node);
   void VisitFixedPointLiteral(const FixedPointLiteral *Node);
+  void VisitDecimalFloatLiteral(const DecimalFloatLiteral *Node);
   void VisitFloatingLiteral(const FloatingLiteral *Node);
   void VisitStringLiteral(const StringLiteral *Str);
   void VisitInitListExpr(const InitListExpr *ILE);

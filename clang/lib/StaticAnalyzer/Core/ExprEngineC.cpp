@@ -408,7 +408,13 @@ void ExprEngine::VisitCast(const CastExpr *CastE, const Expr *Ex,
       case CK_FixedPointCast:
       case CK_FixedPointToBoolean:
       case CK_FixedPointToIntegral:
-      case CK_IntegralToFixedPoint: {
+      case CK_IntegralToFixedPoint:
+      case CK_FloatingToDecimalFloat:
+      case CK_DecimalFloatToFloating:
+      case CK_DecimalFloatCast:
+      case CK_DecimalFloatToBoolean:
+      case CK_DecimalFloatToIntegral:
+      case CK_IntegralToDecimalFloat: {
         state =
             handleLValueBitCast(state, Ex, LCtx, T, ExTy, CastE, Bldr, Pred);
         continue;

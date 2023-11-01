@@ -2907,6 +2907,10 @@ Stmt *ASTReader::ReadStmtFromStream(ModuleFile &F) {
       S = FixedPointLiteral::Create(Context, Empty);
       break;
 
+    case EXPR_DECIMALFLOAT_LITERAL:
+      S = DecimalFloatLiteral::Create(Context, Empty);
+      break;
+
     case EXPR_FLOATING_LITERAL:
       S = FloatingLiteral::Create(Context, Empty);
       break;

@@ -1531,7 +1531,12 @@ enum CXCursorKind {
    */
   CXCursor_RequiresExpr = 154,
 
-  CXCursor_LastExpr = CXCursor_RequiresExpr,
+  /**
+   * Decimal Float literal
+   */
+  CXCursor_DecimalFloatLiteral = 155,
+
+  CXCursor_LastExpr = CXCursor_DecimalFloatLiteral,
 
   /* Statements */
   CXCursor_FirstStmt = 200,

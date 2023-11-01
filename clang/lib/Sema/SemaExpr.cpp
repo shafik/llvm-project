@@ -3907,6 +3907,24 @@ ExprResult Sema::ActOnNumericConstant(const Token &Tok, Scope *UDLScope) {
 
     Res = FixedPointLiteral::CreateFromRawInt(Context, Val, Ty,
                                               Tok.getLocation(), scale);
+  } else if (Literal.isDecimalFloatLiteral()) {
+    QualType Ty;
+
+    if (Literal.isDecimal32)
+      Ty = Context.DecimalFloat32Ty;
+    else if (Literal.isDecimal64)
+      Ty = Context.DecimalFloat64Ty;
+    else if (Literal.isDecimal128)
+      Ty = Context.DecimalFloat128Ty;
+
+    unsigned bit_width = Context.getTypeInfo(Ty).Width;
+
+    llvm::APDecimalFloat Val(llvm::decFltSemantics(
+        32u, /*Scale=*/1u, /*IsSigned=*/0u, /*IsSaturated=*/false,
+        /*HasUnsignedPadding=*/false));
+    bool Overflowed = Literal.GetDecimalFloatValue(Val);
+    Res = DecimalFloatLiteral::CreateFromAPDecimalFloat(
+        Context, Val, Ty, Tok.getLocation(), bit_width);
   } else if (Literal.isFloatingLiteral()) {
     QualType Ty;
     if (Literal.isHalf){

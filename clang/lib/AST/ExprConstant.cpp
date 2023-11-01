@@ -6908,6 +6908,8 @@ class APValueToBufferConverter {
       return visitInt(Val.getInt(), Ty, Offset);
     case APValue::Float:
       return visitFloat(Val.getFloat(), Ty, Offset);
+    case APValue::DecimalFloat:
+      return visitDecimalFloat(Val.getDecimalFloat(), Ty, Offset);
     case APValue::Array:
       return visitArray(Val, Ty, Offset);
     case APValue::Struct:
@@ -7017,6 +7019,12 @@ class APValueToBufferConverter {
   }
 
   bool visitFloat(const APFloat &Val, QualType Ty, CharUnits Offset) {
+    APSInt AsInt(Val.bitcastToAPInt());
+    return visitInt(AsInt, Ty, Offset);
+  }
+
+  bool visitDecimalFloat(const APDecimalFloat &Val, QualType Ty,
+                         CharUnits Offset) {
     APSInt AsInt(Val.bitcastToAPInt());
     return visitInt(AsInt, Ty, Offset);
   }
@@ -11113,6 +11121,11 @@ class DecimalFloatExprEvaluator
 
   bool Success(const APValue &V, const Expr *E) {
     return Success(V.getDecimalFloat(), E);
+  }
+
+  bool Success(const APInt &V, const Expr *E) {
+    return Success(
+        APDecimalFloat(V, Info.Ctx.getDecimalFloatSemantics(E->getType())), E);
   }
 
   bool Success(const APDecimalFloat &V, const Expr *E) {

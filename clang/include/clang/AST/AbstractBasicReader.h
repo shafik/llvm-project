@@ -190,8 +190,12 @@ public:
 
   llvm::decFltSemantics readdecFltSemantics() {
     unsigned width = asImpl().readUInt32();
-    
-    return llvm::decFltSemantics(width);
+    unsigned scale = asImpl().readUInt32();
+    unsigned isSigned = asImpl().readBool();
+    unsigned isSat = asImpl().readBool();
+    unsigned HasPadding = asImpl().readBool();
+
+    return llvm::decFltSemantics(width, scale, isSigned, isSat, HasPadding);
   }
 
   APValue::LValuePathSerializationHelper readLValuePathSerializationHelper(

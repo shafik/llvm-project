@@ -2500,6 +2500,9 @@ public:
   /// Return true if this is a fixed point or integer type.
   bool isFixedPointOrIntegerType() const;
 
+  /// Return true if this is a decinal float or integer type.
+  bool isDecimalFloatOrIntegerType() const;
+
   /// Return true if this is a saturated fixed point type according to
   /// ISO/IEC JTC1 SC22 WG14 N1169. This type can be signed or unsigned.
   bool isSaturatedFixedPointType() const;
@@ -7291,6 +7294,10 @@ inline bool Type::isDecimalFloatType() const {
 
 inline bool Type::isFixedPointOrIntegerType() const {
   return isFixedPointType() || isIntegerType();
+}
+
+inline bool Type::isDecimalFloatOrIntegerType() const {
+  return isDecimalFloatType() || isIntegerType();
 }
 
 inline bool Type::isSaturatedFixedPointType() const {

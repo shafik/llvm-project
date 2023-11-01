@@ -284,6 +284,7 @@ add_llvm_component_library(LLVMSupport
 
   LINK_LIBS
   ${system_libs} ${imported_libs} ${delayload_flags}
+  "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/libbid.a"
 
   LINK_COMPONENTS
   Demangle

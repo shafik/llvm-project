@@ -28,5 +28,6 @@ add_clang_library(clangLex
   TokenLexer.cpp
 
   LINK_LIBS
+  "/Users/shafik/Downloads/IntelRDFPMathLib20U2/LIBRARY/libbid.a"
   clangBasic
   )

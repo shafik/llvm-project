@@ -17,6 +17,7 @@
 #include "clang/Basic/CharInfo.h"
 #include "clang/Basic/LLVM.h"
 #include "clang/Basic/TokenKinds.h"
+#include "llvm/ADT/APDecimalFloat.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/SmallString.h"
@@ -51,7 +52,8 @@ class NumericLiteralParser {
 
   unsigned radix;
 
-  bool saw_exponent, saw_period, saw_ud_suffix, saw_fixed_point_suffix;
+  bool saw_exponent, saw_period, saw_ud_suffix, saw_fixed_point_suffix,
+      saw_decimal_float_suffix;
 
   SmallString<32> UDSuffixBuf;
 
@@ -72,11 +74,20 @@ public:
   bool isFract : 1;         // 1.0hr/r/lr/uhr/ur/ulr
   bool isAccum : 1;         // 1.0hk/k/lk/uhk/uk/ulk
   bool isBitInt : 1;        // 1wb, 1uwb (C2x)
+  bool isDecimalFloat : 1;  // df/DF for _Decimal32  dd/DD for _Decimal64 dl/DL
+                            // for _Decimal128
+  bool isDecimal32 : 1;     // 6543.0DF
+  bool isDecimal64 : 1;     // 9.99DD
+  bool isDecimal128 : 1;    // 9.99DL
   uint8_t MicrosoftInteger; // Microsoft suffix extension i8, i16, i32, or i64.
 
 
   bool isFixedPointLiteral() const {
     return (saw_period || saw_exponent) && saw_fixed_point_suffix;
+  }
+
+  bool isDecimalFloatLiteral() const {
+    return (saw_period || saw_exponent) && saw_decimal_float_suffix;
   }
 
   bool isIntegerLiteral() const {
@@ -120,6 +131,8 @@ public:
   /// occurred when calculating the integral part of the scaled integer or
   /// calculating the digit sequence of the exponent.
   bool GetFixedPointValue(llvm::APInt &StoreVal, unsigned Scale);
+
+  bool GetDecimalFloatValue(llvm::APDecimalFloat &Result);
 
   /// Get the digits that comprise the literal. This excludes any prefix or
   /// suffix associated with the literal.
