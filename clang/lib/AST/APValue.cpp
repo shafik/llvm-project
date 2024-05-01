@@ -39,8 +39,8 @@ static_assert(
         alignof(Type),
     "Type is insufficiently aligned");
 
-APValue::LValueBase::LValueBase(const ValueDecl *P, unsigned I, unsigned V)
-    : Ptr(P ? cast<ValueDecl>(P->getCanonicalDecl()) : nullptr), Local{I, V} {}
+APValue::LValueBase::LValueBase(const ValueDecl *P, unsigned I, unsigned V, bool AllowConstexprUnknown)
+    : Ptr(P ? cast<ValueDecl>(P->getCanonicalDecl()) : nullptr), Local{I, V}, AllowConstexprUnknown(AllowConstexprUnknown) {}
 APValue::LValueBase::LValueBase(const Expr *P, unsigned I, unsigned V)
     : Ptr(P), Local{I, V} {}
 

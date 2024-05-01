@@ -150,7 +150,7 @@ public:
 
   public:
     LValueBase() : Local{} {}
-    LValueBase(const ValueDecl *P, unsigned I = 0, unsigned V = 0);
+    LValueBase(const ValueDecl *P, unsigned I = 0, unsigned V = 0, bool AllowConstexprUnknown = false);
     LValueBase(const Expr *P, unsigned I = 0, unsigned V = 0);
     static LValueBase getDynamicAlloc(DynamicAllocLValue LV, QualType Type);
     static LValueBase getTypeInfo(TypeInfoLValue LV, QualType TypeInfo);
@@ -179,6 +179,9 @@ public:
 
     QualType getType() const;
 
+    bool allowConstexprUnknown() const { return AllowConstexprUnknown; }
+    void setConstexprUnknown() { AllowConstexprUnknown = true;}
+
     friend bool operator==(const LValueBase &LHS, const LValueBase &RHS);
     friend bool operator!=(const LValueBase &LHS, const LValueBase &RHS) {
       return !(LHS == RHS);
@@ -191,6 +194,7 @@ public:
     struct LocalState {
       unsigned CallIndex, Version;
     };
+    
     union {
       LocalState Local;
       /// The type std::type_info, if this is a TypeInfoLValue.
@@ -198,6 +202,7 @@ public:
       /// The QualType, if this is a DynamicAllocLValue.
       void *DynamicAllocType;
     };
+    bool AllowConstexprUnknown=false;
   };
 
   /// A FieldDecl or CXXRecordDecl, along with a flag indicating whether we
@@ -249,6 +254,7 @@ public:
   struct NoLValuePath {};
   struct UninitArray {};
   struct UninitStruct {};
+  struct ConstexprUnknown {};
 
   template <typename Impl> friend class clang::serialization::BasicReaderBase;
   friend class ASTImporter;
@@ -256,6 +262,7 @@ public:
 
 private:
   ValueKind Kind;
+  bool AllowConstexprUnknown=false;
 
   struct ComplexAPSInt {
     APSInt Real, Imag;
@@ -314,6 +321,18 @@ private:
   DataType Data;
 
 public:
+  bool allowConstexprUnknown() const {
+    if (AllowConstexprUnknown || (isLValue() && getLValueBase() && getLValueBase().allowConstexprUnknown())) {
+      return true;
+    }
+
+    return false;
+  }
+
+  void setConstexprUnknown() {
+    AllowConstexprUnknown = true;
+  }
+
   APValue() : Kind(None) {}
   explicit APValue(APSInt I) : Kind(None) {
     MakeInt(); setInt(std::move(I));
@@ -345,6 +364,11 @@ public:
       : Kind(None) {
     MakeLValue(); setLValue(B, O, Path, OnePastTheEnd, IsNullPtr);
   }
+
+  APValue(LValueBase B, ConstexprUnknown, const CharUnits &O, bool IsNullPtr = false) : Kind(None), AllowConstexprUnknown(true) {
+    MakeLValue();  setLValue(B, O, NoLValuePath{}, IsNullPtr);
+  }
+
   APValue(UninitArray, unsigned InitElts, unsigned Size) : Kind(None) {
     MakeArray(InitElts, Size);
   }
